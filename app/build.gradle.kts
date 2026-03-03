@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "br.com.fiap.axoeduc"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "br.com.fiap.axoeduc"

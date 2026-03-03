@@ -7,10 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,28 +20,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             AxoEducTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                    val navController = rememberNavController()
+
+                    // Configuração da navegação principal do app
+                    NavHost(
+                        navController = navController,
+                        startDestination = "cursos",
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable("cursos") {
+                            CursosScreen()
+                        }
+
+                        // TODO: Adicionar as outras rotas conforme as telas forem ficando prontas
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AxoEducTheme {
-        Greeting("Android")
     }
 }
