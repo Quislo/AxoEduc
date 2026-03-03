@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
+import br.com.fiap.axoeduc.components.BottomMenu
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,10 +20,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AxoEducTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val navController = rememberNavController()
+                val navController = rememberNavController()
 
-                    // Configuração da navegação principal do app
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        BottomMenu(
+                            onCursosClick = {
+                                navController.navigate("cursos")
+                            },
+                            onFerramentasClick = { /* TODO: Criar navegação quando a tela existir */ },
+                            onCertificadosClick = { /* TODO: Criar navegação quando a tela existir */ }
+                        )
+                    }
+                ) { innerPadding ->
+
                     NavHost(
                         navController = navController,
                         startDestination = "cursos",
@@ -31,8 +43,6 @@ class MainActivity : ComponentActivity() {
                         composable("cursos") {
                             CursosScreen()
                         }
-
-                        // TODO: Adicionar as outras rotas conforme as telas forem ficando prontas
                     }
                 }
             }
