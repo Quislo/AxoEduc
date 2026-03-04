@@ -14,6 +14,8 @@ import androidx.navigation.compose.rememberNavController
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 import br.com.fiap.axoeduc.components.BottomMenu
 import br.com.fiap.axoeduc.screens.CursosScreen
+import br.com.fiap.axoeduc.screens.FerramentasScreen
+import br.com.fiap.axoeduc.components.CustomTopBar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,13 +27,20 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        CustomTopBar(
+                            onProfileClick = { /* TODO: Futura tela de perfil */ }
+                        )
+                    },
                     bottomBar = {
                         BottomMenu(
                             onCursosClick = {
                                 navController.navigate("cursos")
                             },
-                            onFerramentasClick = { /* TODO: Criar navegação quando a tela existir */ },
-                            onCertificadosClick = { /* TODO: Criar navegação quando a tela existir */ }
+                            onFerramentasClick = {
+                                navController.navigate("ferramentas")
+                            },
+                            onCertificadosClick = {    /* TODO: Criar navegação quando a tela existir */ }
                         )
                     }
                 ) { innerPadding ->
@@ -43,6 +52,17 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("cursos") {
                             CursosScreen()
+                        }
+                        composable("ferramentas") {
+                            FerramentasScreen(
+                                onProfileClick = { /* TODO: Tela de perfil */ },
+                                onCursosClick = { navController.navigate("cursos") },
+                                onFerramentasClick = { navController.navigate("ferramentas") },
+                                onCertificadosClick = { /* TODO: Tela de certificados */ },
+                                onCofrinhoClick = { /* TODO */ },
+                                onCalculadoraClick = { /* TODO */ },
+                                onInvestimentosClick = { /* TODO */ }
+                            )
                         }
                     }
                 }
