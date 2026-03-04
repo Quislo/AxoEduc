@@ -1,4 +1,4 @@
-package br.com.fiap.axoeduc
+package br.com.fiap.axoeduc.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable

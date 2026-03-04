@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 import br.com.fiap.axoeduc.components.BottomMenu
+import br.com.fiap.axoeduc.screens.CursosScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
