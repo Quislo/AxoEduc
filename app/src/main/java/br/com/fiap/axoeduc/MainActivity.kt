@@ -7,11 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
+import br.com.fiap.axoeduc.components.BottomMenu
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +20,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AxoEducTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                val navController = rememberNavController()
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        BottomMenu(
+                            onCursosClick = {
+                                navController.navigate("cursos")
+                            },
+                            onFerramentasClick = { /* TODO: Criar navegação quando a tela existir */ },
+                            onCertificadosClick = { /* TODO: Criar navegação quando a tela existir */ }
+                        )
+                    }
+                ) { innerPadding ->
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "cursos",
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable("cursos") {
+                            CursosScreen()
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AxoEducTheme {
-        Greeting("Android")
     }
 }
