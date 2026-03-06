@@ -16,6 +16,9 @@ import br.com.fiap.axoeduc.components.BottomMenu
 import br.com.fiap.axoeduc.screens.CursosScreen
 import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.components.CustomTopBar
+import br.com.fiap.axoeduc.screens.CalculadoraJurosResultadoScreen
+import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
+import br.com.fiap.axoeduc.screens.CofrinhoScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,21 +50,54 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "cursos",
+                        startDestination = "ScreenRoutes.CURSOS",
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("cursos") {
+                        composable("ScreenRoutes.CURSOS") {
                             CursosScreen()
                         }
-                        composable("ferramentas") {
+
+                        composable("ScreenRoutes.FERRAMENTAS") {
                             FerramentasScreen(
-                                onProfileClick = { /* TODO: Tela de perfil */ },
-                                onCursosClick = { navController.navigate("cursos") },
-                                onFerramentasClick = { navController.navigate("ferramentas") },
-                                onCertificadosClick = { /* TODO: Tela de certificados */ },
-                                onCofrinhoClick = { /* TODO */ },
-                                onCalculadoraClick = { /* TODO */ },
-                                onInvestimentosClick = { /* TODO */ }
+                                onProfileClick = { /* TODO. */ },
+                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
+                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
+                                onCertificadosClick = { /* TODO. */ },
+
+                                onCofrinhoClick = { navController.navigate("ScreenRoutes.COFRINHO") },
+                                onCalculadoraClick = { navController.navigate("ScreenRoutes.CALCULADORA") },
+                                onInvestimentosClick = { /* TODO. */ }
+                            )
+                        }
+
+                        composable("cofrinho") {
+                            CofrinhoScreen(
+                                onProfileClick = { /* TODO. */ },
+                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
+                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
+                                onCertificadosClick = { /* TODO. */ }
+                            )
+                        }
+
+                        composable("calculadora") {
+                            CalculadoraJurosScreen(
+                                onProfileClick = { /* TODO */ },
+                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
+                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
+                                onCertificadosClick = { /* TODO. */ },
+                                onCalcularClick = { renda, objetivo ->
+
+                                    navController.navigate("ScreenRoutes.CALCULADORA_RESULTADOS")
+                                }
+                            )
+                        }
+
+                        composable("calculadora_resultado") {
+                            CalculadoraJurosResultadoScreen(
+                                onProfileClick = { /* TODO */ },
+                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
+                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
+                                onCertificadosClick = { /* TODO. */ }
                             )
                         }
                     }
