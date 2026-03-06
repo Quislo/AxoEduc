@@ -1,18 +1,28 @@
 package br.com.fiap.axoeduc.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import br.com.fiap.axoeduc.viewmodel.CursosViewModel
+
+data class Curso(
+    val titulo: String,
+    val progresso: Float
+)
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -22,58 +32,46 @@ fun CursosScreenPreview() {
 
 
 @Composable
-fun CursosScreen() {
-    Column(
+fun CursosScreen(viewModel: CursosViewModel = viewModel()) {
+
+    val listaDeCursos by viewModel.cursos.collectAsState()
+
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
 
 
-        Text(
-            text = "Cursos",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.DarkGray
-        )
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "Cursos",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.DarkGray
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+
+        items(listaDeCursos) { curso ->
+            CursoCard(
+                titulo = curso.titulo,
+                progresso = curso.progresso,
+                textoProgresso = "${(curso.progresso * 100).toInt()}%",
+                textoBotao = if (curso.progresso == 0f) "Iniciar" else "Continuar"
+            )
+        }
 
 
-        CursoCard(
-            titulo = "Meu Primeiro Orçamento",
-            progresso = 0.25f,
-            textoProgresso = "25%",
-            textoBotao = "Continuar"
-        )
-
-        CursoCard(
-            titulo = "Gestão pessoal",
-            progresso = 1.0f,
-            textoProgresso = "100%",
-            textoBotao = "Continuar"
-        )
-
-        CursoCard(
-            titulo = "Investimentos a longo prazo",
-            progresso = 0.0f,
-            textoProgresso = "0%",
-            textoBotao = "Iniciar"
-        )
-
-        CursoCard(
-            titulo = "Renda Extra sem sair de casa",
-            progresso = 0.60f,
-            textoProgresso = "60%",
-            textoBotao = "Continuar"
-        )
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }
-
 @Composable
 fun CursoCard(titulo: String, progresso: Float, textoProgresso: String, textoBotao: String) {
     Card(
