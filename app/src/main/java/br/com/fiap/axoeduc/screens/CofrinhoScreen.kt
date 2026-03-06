@@ -1,21 +1,24 @@
 package br.com.fiap.axoeduc.screens
 
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import br.com.fiap.axoeduc.viewmodel.CofrinhoViewModel
-import br.com.fiap.axoeduc.model.Cofrinho
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Savings
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +28,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.fiap.axoeduc.R
-import br.com.fiap.axoeduc.components.CustomTopBar
-import br.com.fiap.axoeduc.components.BottomMenu
+import br.com.fiap.axoeduc.model.Cofrinho
+import br.com.fiap.axoeduc.viewmodel.CofrinhoViewModel
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -54,72 +58,60 @@ fun CofrinhoScreen(
 
     val cofrinhos = viewModel.cofrinhos
 
-    Scaffold(
-        topBar = {
-            CustomTopBar(onProfileClick = onProfileClick)
-        },
-        bottomBar = {
-            BottomMenu(
-                onCursosClick = onCursosClick,
-                onFerramentasClick = onFerramentasClick,
-                onCertificadosClick = onCertificadosClick
-            )
-        }
-    ) { paddingValues ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.cofrinho_screen),
+            contentDescription = "Cofrinho",
+            modifier = Modifier.size(120.dp)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "Cofrinho",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+            AcaoCofrinho("+", "Criar reserva")
+            AcaoCofrinho("💰", "Depositar")
+            AcaoCofrinho("↩", "Retirar")
+        }
 
-            Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
-            Image(
-                painter = painterResource(id = R.drawable.cofrinho_screen),
-                contentDescription = "Cofrinho",
-                modifier = Modifier.size(120.dp)
-            )
+        Text(
+            text = "Seus cofrinhos",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Start)
+        )
 
-            Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
-                text = "Cofrinho",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                AcaoCofrinho("+", "Criar reserva")
-                AcaoCofrinho("💰", "Depositar")
-                AcaoCofrinho("↩", "Retirar")
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Text(
-                text = "Seus cofrinhos",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            LazyColumn {
-                items(cofrinhos) { cofrinho ->
-                    CofrinhoItem(cofrinho)
-                }
+        LazyColumn {
+            items(cofrinhos) { cofrinho ->
+                CofrinhoItem(cofrinho)
             }
         }
     }
 }
+
 
 @Composable
 fun CofrinhoItem(cofrinho: Cofrinho) {
