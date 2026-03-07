@@ -21,12 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import android.util.Patterns
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,21 +31,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.fiap.axoeduc.R
 import br.com.fiap.axoeduc.components.EmailInput
 import br.com.fiap.axoeduc.components.SenhaInput
+import br.com.fiap.axoeduc.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
-    var email by remember { mutableStateOf("") }
-    var senha by remember { mutableStateOf("") }
-    var enviado by remember { mutableStateOf(false) }
-
-    fun isFormValid(): Boolean {
-        return email.isNotBlank()
-                && Patterns.EMAIL_ADDRESS.matcher(email).matches()
-                && senha.isNotBlank()
-    }
+fun LoginScreen(
+    onLoginSuccess: () -> Unit = {},
+    onCriarConta: () -> Unit = {},
+    viewModel: LoginViewModel = viewModel()
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -79,23 +71,23 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(24.dp))
 
             EmailInput(
-                email = email,
+                email = viewModel.email,
                 onValueChange = {
-                    email = it
-                    enviado = false
+                    viewModel.email = it
+                    viewModel.enviado = false
                 },
-                enviado = enviado
+                enviado = viewModel.enviado
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             SenhaInput(
-                senha = senha,
+                senha = viewModel.senha,
                 onValueChange = {
-                    senha = it
-                    enviado = false
+                    viewModel.senha = it
+                    viewModel.enviado = false
                 },
-                enviado = enviado
+                enviado = viewModel.enviado
             )
 
             Spacer(modifier = Modifier.height(2.dp))
@@ -113,12 +105,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
 
             Button(
                 onClick = {
-                    enviado = true
-                    if (isFormValid()) {
+                    if (viewModel.tentarLogin()) {
                         onLoginSuccess()
                     }
                 },
-                enabled = isFormValid(),
+                enabled = viewModel.isFormValid(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF3030D6),
                     disabledContainerColor = Color(0x663030D6),
@@ -215,7 +206,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
                 color = Color(0xFFFFFFFF),
             )
             TextButton(
-                onClick = {},
+                onClick = onCriarConta,
                 contentPadding = PaddingValues(start = 4.dp)
             ) {
                 Text(
