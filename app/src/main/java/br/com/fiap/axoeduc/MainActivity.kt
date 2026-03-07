@@ -10,20 +10,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 import br.com.fiap.axoeduc.components.BottomMenu
+import br.com.fiap.axoeduc.screens.CursosScreen
+import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.components.CustomTopBar
 import br.com.fiap.axoeduc.navigation.ScreenRoutes
 import br.com.fiap.axoeduc.screens.CalculadoraJurosResultadoScreen
 import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
 import br.com.fiap.axoeduc.screens.CertificadosScreen
 import br.com.fiap.axoeduc.screens.CofrinhoScreen
-import br.com.fiap.axoeduc.screens.CursosScreen
-import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.screens.InvestimentosScreen
-import br.com.fiap.axoeduc.screens.LoginScreen
-import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,48 +30,32 @@ class MainActivity : ComponentActivity() {
         setContent {
             AxoEducTheme {
                 val navController = rememberNavController()
-                val navBackStackEntryState = navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntryState.value?.destination?.route
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
-                        if (currentRoute != ScreenRoutes.LOGIN) {
-                            CustomTopBar(
-                                onProfileClick = { /* TODO: Futura tela de perfil */ }
-                            )
-                        }
+                        CustomTopBar(
+                            onProfileClick = { /* TODO: Futura tela de perfil */ }
+                        )
                     },
                     bottomBar = {
-                        if (currentRoute != ScreenRoutes.LOGIN) {
-                            BottomMenu(
-                                onCursosClick = {
-                                    navController.navigate(ScreenRoutes.CURSOS)
-                                },
-                                onFerramentasClick = {
-                                    navController.navigate(ScreenRoutes.FERRAMENTAS)
-                                },
-                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
-                            )
-                        }
+                        BottomMenu(
+                            onCursosClick = {
+                                navController.navigate(ScreenRoutes.CURSOS)
+                            },
+                            onFerramentasClick = {
+                                navController.navigate(ScreenRoutes.FERRAMENTAS)
+                            },
+                            onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
+                        )
                     }
                 ) { innerPadding ->
 
                     NavHost(
                         navController = navController,
-                        startDestination = ScreenRoutes.LOGIN,
+                        startDestination = ScreenRoutes.CURSOS,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable(ScreenRoutes.LOGIN) {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    navController.navigate(ScreenRoutes.CURSOS) {
-                                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
-                                    }
-                                }
-                            )
-                        }
-
                         composable(ScreenRoutes.CURSOS) {
                             CursosScreen()
                         }
