@@ -6,4 +6,6 @@ object ScreenRoutes {
     const val COFRINHO = "cofrinho"
     const val CALCULADORA = "calculadora"
     const val CALCULADORA_RESULTADOS = "calculadora_resultado"
+    const val CERTIFICADOS = "certificados"
+    const val INVESTIMENTOS = "investimentos"
 }

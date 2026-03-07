@@ -16,9 +16,12 @@ import br.com.fiap.axoeduc.components.BottomMenu
 import br.com.fiap.axoeduc.screens.CursosScreen
 import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.components.CustomTopBar
+import br.com.fiap.axoeduc.navigation.ScreenRoutes
 import br.com.fiap.axoeduc.screens.CalculadoraJurosResultadoScreen
 import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
+import br.com.fiap.axoeduc.screens.CertificadosScreen
 import br.com.fiap.axoeduc.screens.CofrinhoScreen
+import br.com.fiap.axoeduc.screens.InvestimentosScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,66 +41,83 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         BottomMenu(
                             onCursosClick = {
-                                navController.navigate("cursos")
+                                navController.navigate(ScreenRoutes.CURSOS)
                             },
                             onFerramentasClick = {
-                                navController.navigate("ferramentas")
+                                navController.navigate(ScreenRoutes.FERRAMENTAS)
                             },
-                            onCertificadosClick = {    /* TODO: Criar navegação quando a tela existir */ }
+                            onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
                         )
                     }
                 ) { innerPadding ->
 
                     NavHost(
                         navController = navController,
-                        startDestination = "ScreenRoutes.CURSOS",
+                        startDestination = ScreenRoutes.CURSOS,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("ScreenRoutes.CURSOS") {
+                        composable(ScreenRoutes.CURSOS) {
                             CursosScreen()
                         }
 
-                        composable("ScreenRoutes.FERRAMENTAS") {
+                        composable(ScreenRoutes.FERRAMENTAS) {
                             FerramentasScreen(
-                                onProfileClick = { /* TODO. */ },
-                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
-                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
-                                onCertificadosClick = { /* TODO. */ },
-
-                                onCofrinhoClick = { navController.navigate("ScreenRoutes.COFRINHO") },
-                                onCalculadoraClick = { navController.navigate("ScreenRoutes.CALCULADORA") },
-                                onInvestimentosClick = { /* TODO. */ }
+                                onProfileClick = { /* TODO */ },
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
+                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
+                                onCofrinhoClick = { navController.navigate(ScreenRoutes.COFRINHO) },
+                                onCalculadoraClick = { navController.navigate(ScreenRoutes.CALCULADORA) },
+                                onInvestimentosClick = { navController.navigate(ScreenRoutes.INVESTIMENTOS) }
                             )
                         }
 
-                        composable("cofrinho") {
+                        composable(ScreenRoutes.COFRINHO) {
                             CofrinhoScreen(
-                                onProfileClick = { /* TODO. */ },
-                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
-                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
-                                onCertificadosClick = { /* TODO. */ }
+                                onProfileClick = { /* TODO */ },
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
+                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
                             )
                         }
 
-                        composable("calculadora") {
+                        composable(ScreenRoutes.CALCULADORA) {
                             CalculadoraJurosScreen(
                                 onProfileClick = { /* TODO */ },
-                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
-                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
-                                onCertificadosClick = { /* TODO. */ },
-                                onCalcularClick = { renda, objetivo ->
-
-                                    navController.navigate("ScreenRoutes.CALCULADORA_RESULTADOS")
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
+                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
+                                onCalcularClick = { _, _ ->
+                                    navController.navigate(ScreenRoutes.CALCULADORA_RESULTADOS)
                                 }
                             )
                         }
 
-                        composable("calculadora_resultado") {
+                        composable(ScreenRoutes.CALCULADORA_RESULTADOS) {
                             CalculadoraJurosResultadoScreen(
                                 onProfileClick = { /* TODO */ },
-                                onCursosClick = { navController.navigate("ScreenRoutes.CURSOS") },
-                                onFerramentasClick = { navController.navigate("ScreenRoutes.FERRAMENTAS") },
-                                onCertificadosClick = { /* TODO. */ }
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
+                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
+                            )
+                        }
+
+                        composable(ScreenRoutes.CERTIFICADOS) {
+                            CertificadosScreen(
+                                onProfileClick = { /* TODO */ },
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
+                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
+                            )
+                        }
+
+                        composable(ScreenRoutes.INVESTIMENTOS) {
+                            InvestimentosScreen(
+                                onProfileClick = { /* TODO */ },
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
+                                onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
+                                onInvestimentoClick = { /* TODO: */ }
                             )
                         }
                     }
