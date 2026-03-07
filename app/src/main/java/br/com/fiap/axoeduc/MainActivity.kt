@@ -22,6 +22,9 @@ import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
 import br.com.fiap.axoeduc.screens.CertificadosScreen
 import br.com.fiap.axoeduc.screens.CofrinhoScreen
 import br.com.fiap.axoeduc.screens.InvestimentosScreen
+import androidx.compose.ui.tooling.preview.Preview
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
