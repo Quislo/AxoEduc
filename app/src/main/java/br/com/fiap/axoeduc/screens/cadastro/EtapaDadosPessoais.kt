@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import br.com.fiap.axoeduc.components.DataNascimentoInput
-import br.com.fiap.axoeduc.components.NomeInput
+import br.com.fiap.axoeduc.components.inputs.DataNascimentoInput
+import br.com.fiap.axoeduc.components.inputs.NomeInput
 
 @Composable
 fun EtapaDadosPessoais(

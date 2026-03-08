@@ -1,4 +1,4 @@
-package br.com.fiap.axoeduc.components
+package br.com.fiap.axoeduc.components.inputs
 
 import android.util.Patterns
 import androidx.compose.foundation.layout.Column

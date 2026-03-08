@@ -35,19 +35,18 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.fiap.axoeduc.viewmodel.PerfilViewModel
 
 @Composable
 fun PerfilScreen(
-    nome: String = "João Costa Sales",
-    email: String = "joaocosta@gmail.com",
-    onNomeChange: (String) -> Unit = {},
-    onEmailChange: (String) -> Unit = {},
     onVoltarClick: () -> Unit = {},
     onEditFotoClick: () -> Unit = {},
     onAlterarSenhaClick: () -> Unit = {},
     onReportarBugClick: () -> Unit = {},
     onFaleConoscoClick: () -> Unit = {},
-    onSairClick: () -> Unit = {}
+    onSairClick: () -> Unit = {},
+    viewModel: PerfilViewModel = viewModel(),
 ) {
     Column(
         modifier = Modifier
@@ -123,10 +122,9 @@ fun PerfilScreen(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-
         OutlinedTextField(
-            value = nome,
-            onValueChange = onNomeChange,
+            value = viewModel.nome,
+            onValueChange = viewModel::onNomeChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Nome") },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
@@ -145,10 +143,9 @@ fun PerfilScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
         OutlinedTextField(
-            value = email,
-            onValueChange = onEmailChange,
+            value = viewModel.email,
+            onValueChange = viewModel::onEmailChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Email") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),

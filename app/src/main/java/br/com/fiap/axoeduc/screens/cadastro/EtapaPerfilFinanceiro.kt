@@ -1,7 +1,7 @@
 package br.com.fiap.axoeduc.screens.cadastro
 
 import androidx.compose.runtime.Composable
-import br.com.fiap.axoeduc.components.RendaMensalInput
+import br.com.fiap.axoeduc.components.inputs.RendaMensalInput
 
 @Composable
 fun EtapaPerfilFinanceiro(
