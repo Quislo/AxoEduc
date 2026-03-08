@@ -24,6 +24,7 @@ import br.com.fiap.axoeduc.screens.CertificadosScreen
 import br.com.fiap.axoeduc.screens.CofrinhoScreen
 import br.com.fiap.axoeduc.screens.InvestimentosScreen
 import br.com.fiap.axoeduc.screens.LoginScreen
+import br.com.fiap.axoeduc.screens.PerfilScreen
 import br.com.fiap.axoeduc.screens.cadastro.CadastroScreen
 
 class MainActivity : ComponentActivity() {
@@ -39,14 +40,20 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
-                        if (currentRoute != ScreenRoutes.LOGIN && currentRoute != ScreenRoutes.CADASTRO) {
+                        if (currentRoute != ScreenRoutes.LOGIN &&
+                            currentRoute != ScreenRoutes.CADASTRO &&
+                            currentRoute != ScreenRoutes.PERFIL) {
                             CustomTopBar(
-                                onProfileClick = { /* TODO: Futura tela de perfil */ }
+                                onProfileClick = {
+                                    navController.navigate(ScreenRoutes.PERFIL)
+                                }
                             )
                         }
                     },
                     bottomBar = {
-                        if (currentRoute != ScreenRoutes.LOGIN && currentRoute != ScreenRoutes.CADASTRO) {
+                        if (currentRoute != ScreenRoutes.LOGIN &&
+                            currentRoute != ScreenRoutes.CADASTRO &&
+                            currentRoute != ScreenRoutes.PERFIL) {
                             BottomMenu(
                                 onCursosClick = {
                                     navController.navigate(ScreenRoutes.CURSOS)
@@ -97,7 +104,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.FERRAMENTAS) {
                             FerramentasScreen(
-                                onProfileClick = { /* TODO */ },
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
@@ -109,7 +116,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.COFRINHO) {
                             CofrinhoScreen(
-                                onProfileClick = { /* TODO */ },
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
@@ -118,7 +125,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CALCULADORA) {
                             CalculadoraJurosScreen(
-                                onProfileClick = { /* TODO */ },
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
@@ -130,7 +137,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CALCULADORA_RESULTADOS) {
                             CalculadoraJurosResultadoScreen(
-                                onProfileClick = { /* TODO */ },
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
@@ -139,7 +146,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CERTIFICADOS) {
                             CertificadosScreen(
-                                onProfileClick = { /* TODO */ },
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
@@ -148,11 +155,19 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.INVESTIMENTOS) {
                             InvestimentosScreen(
-                                onProfileClick = { /* TODO */ },
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
                                 onInvestimentoClick = { /* TODO: */ }
+                            )
+                            }
+
+                        composable(ScreenRoutes.PERFIL) {
+                            PerfilScreen(
+                                onVoltarClick = {
+                                    navController.popBackStack()
+                                }
                             )
                         }
                     }
