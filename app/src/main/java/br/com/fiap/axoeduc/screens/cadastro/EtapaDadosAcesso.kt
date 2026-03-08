@@ -20,9 +20,9 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.com.fiap.axoeduc.components.ConfirmarSenhaInput
-import br.com.fiap.axoeduc.components.EmailInput
-import br.com.fiap.axoeduc.components.SenhaInput
+import br.com.fiap.axoeduc.components.inputs.ConfirmarSenhaInput
+import br.com.fiap.axoeduc.components.inputs.EmailInput
+import br.com.fiap.axoeduc.components.inputs.SenhaInput
 
 @Composable
 fun EtapaDadosAcesso(

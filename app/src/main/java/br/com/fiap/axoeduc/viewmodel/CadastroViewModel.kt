@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import br.com.fiap.axoeduc.components.validarData
+import br.com.fiap.axoeduc.components.inputs.validarData
 
 class CadastroViewModel : ViewModel() {
 
