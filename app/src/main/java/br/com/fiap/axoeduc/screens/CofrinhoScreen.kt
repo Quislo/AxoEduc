@@ -77,12 +77,17 @@ fun CofrinhoScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            BotaoAcao("Criar reserva", Icons.Default.Add) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                BotaoAcao("Criar reserva", Icons.Default.Add,) {
                 abrirCriar = true
-            }
+            } }
+
 
             BotaoAcao("Depositar", Icons.Default.AttachMoney) {
                 abrirDeposito = true
@@ -283,7 +288,9 @@ fun DialogCriarReserva(
                     )
                 }
             ) {
-                Text("Criar")
+                Text(
+                    text = "Criar",
+                )
             }
         }
     )
