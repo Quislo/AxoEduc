@@ -73,7 +73,8 @@ fun CursosScreen(viewModel: CursosViewModel = viewModel()) {
                 progresso = curso.progresso,
                 textoProgresso = "${(curso.progresso * 100).toInt()}%",
                 textoBotao = textoBotao,
-                url = curso.url
+                url = curso.url,
+                onConcluir = { viewModel.marcarComoConcluido(curso.titulo) }
             )
         }
 
@@ -89,7 +90,8 @@ fun CursoCard(
     progresso: Float,
     textoProgresso: String,
     textoBotao: String,
-    url: String
+    url: String,
+    onConcluir: () -> Unit
 ) {
 
     val uriHandler = LocalUriHandler.current
@@ -141,7 +143,9 @@ fun CursoCard(
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { uriHandler.openUri(url) },
+                onClick = { uriHandler.openUri(url)
+                    onConcluir()
+                          },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),

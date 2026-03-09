@@ -17,10 +17,19 @@ class CursosViewModel : ViewModel() {
 
     private fun carregarCursos() {
         _cursos.value = listOf(
-            Curso("Meu Primeiro Orçamento", 0.25f, "https://www.youtube.com/watch?v=in0XbfQEm2A"),
-            Curso("Gestão pessoal", 1.0f, "https://www.youtube.com/watch?v=SJ7-ImU4UYc"),
+            Curso("Meu Primeiro Orçamento", 0.0f, "https://www.youtube.com/watch?v=in0XbfQEm2A"),
+            Curso("Gestão pessoal", 0.0f, "https://www.youtube.com/watch?v=SJ7-ImU4UYc"),
             Curso("Investimentos a longo prazo", 0.0f, "https://www.youtube.com/watch?v=1cJO6Z2liWA"),
-            Curso("Renda Extra sem sair de casa", 0.60f, "https://www.youtube.com/watch?v=pHAOS_NAoxc")
+            Curso("Renda Extra sem sair de casa", 0.0f, "https://www.youtube.com/watch?v=pHAOS_NAoxc")
         )
+    }
+    fun marcarComoConcluido(titulo: String) {
+        _cursos.value = _cursos.value.map { curso ->
+            if (curso.titulo == titulo) {
+                curso.copy(progresso = 1.0f)
+            } else {
+                curso
+            }
+        }
     }
 }

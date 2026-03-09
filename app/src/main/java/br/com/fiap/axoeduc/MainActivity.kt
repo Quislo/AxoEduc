@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,10 +15,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 import br.com.fiap.axoeduc.components.BottomMenu
-import br.com.fiap.axoeduc.screens.CursosScreen
-import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.components.CustomTopBar
 import br.com.fiap.axoeduc.navigation.ScreenRoutes
+import br.com.fiap.axoeduc.screens.CursosScreen
+import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.screens.CalculadoraJurosResultadoScreen
 import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
 import br.com.fiap.axoeduc.screens.CertificadosScreen
@@ -34,44 +35,40 @@ class MainActivity : ComponentActivity() {
         setContent {
             AxoEducTheme {
                 val navController = rememberNavController()
-                val navBackStackEntryState = navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntryState.value?.destination?.route
+
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                val showBars = currentRoute != ScreenRoutes.LOGIN &&
+                        currentRoute != ScreenRoutes.CADASTRO &&
+                        currentRoute != ScreenRoutes.PERFIL
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
-                        if (currentRoute != ScreenRoutes.LOGIN &&
-                            currentRoute != ScreenRoutes.CADASTRO &&
-                            currentRoute != ScreenRoutes.PERFIL) {
+                        if (showBars) {
                             CustomTopBar(
-                                onProfileClick = {
-                                    navController.navigate(ScreenRoutes.PERFIL)
-                                }
+                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) }
                             )
                         }
                     },
                     bottomBar = {
-                        if (currentRoute != ScreenRoutes.LOGIN &&
-                            currentRoute != ScreenRoutes.CADASTRO &&
-                            currentRoute != ScreenRoutes.PERFIL) {
+                        if (showBars) {
                             BottomMenu(
-                                onCursosClick = {
-                                    navController.navigate(ScreenRoutes.CURSOS)
-                                },
-                                onFerramentasClick = {
-                                    navController.navigate(ScreenRoutes.FERRAMENTAS)
-                                },
+                                onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
+                                onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
                             )
                         }
                     }
-                ) { innerPadding ->
+                ) { paddingValues ->
 
                     NavHost(
                         navController = navController,
                         startDestination = ScreenRoutes.LOGIN,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(paddingValues)
                     ) {
+
                         composable(ScreenRoutes.LOGIN) {
                             LoginScreen(
                                 onLoginSuccess = {
@@ -79,21 +76,28 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
-                                onCriarConta = {
-                                    navController.navigate(ScreenRoutes.CADASTRO)
-                                }
+                                onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) }
                             )
                         }
 
                         composable(ScreenRoutes.CADASTRO) {
                             CadastroScreen(
                                 onCadastroSucesso = {
-                                    navController.navigate(ScreenRoutes.CURSOS) {
-                                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
+                                    navController.navigate(ScreenRoutes.LOGIN) {
+                                        popUpTo(ScreenRoutes.CADASTRO) { inclusive = true }
                                     }
                                 },
-                                onVoltarLogin = {
-                                    navController.popBackStack()
+                                onVoltarLogin = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(ScreenRoutes.PERFIL) {
+                            PerfilScreen(
+                                onVoltarClick = { navController.popBackStack() },
+                                onSairClick = {
+                                    navController.navigate(ScreenRoutes.LOGIN) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             )
                         }
@@ -129,9 +133,7 @@ class MainActivity : ComponentActivity() {
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
-                                onCalcularClick = { _, _ ->
-                                    navController.navigate(ScreenRoutes.CALCULADORA_RESULTADOS)
-                                }
+                                onCalcularClick = { _, _ -> navController.navigate(ScreenRoutes.CALCULADORA_RESULTADOS) }
                             )
                         }
 
@@ -159,15 +161,7 @@ class MainActivity : ComponentActivity() {
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
-                                onInvestimentoClick = { /* TODO: */ }
-                            )
-                            }
-
-                        composable(ScreenRoutes.PERFIL) {
-                            PerfilScreen(
-                                onVoltarClick = {
-                                    navController.popBackStack()
-                                }
+                                onInvestimentoClick = { /* TODO futuramente */ }
                             )
                         }
                     }
