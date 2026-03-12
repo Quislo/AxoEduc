@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -21,13 +20,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.fiap.axoeduc.R
-import br.com.fiap.axoeduc.model.Reserva
+import br.com.fiap.axoeduc.model.Cofrinho
 import br.com.fiap.axoeduc.viewmodel.CofrinhoViewModel
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CofrinhoScreenPreview() {
-
     CofrinhoScreen(
         onProfileClick = {},
         onCursosClick = {},
@@ -45,7 +43,7 @@ fun CofrinhoScreen(
     viewModel: CofrinhoViewModel = viewModel()
 ) {
 
-    val reservas by viewModel.reservas.collectAsState()
+    val reservas by viewModel.reservas.collectAsState(initial = emptyList())
 
     var abrirCriar by remember { mutableStateOf(false) }
     var abrirDeposito by remember { mutableStateOf(false) }
@@ -77,17 +75,12 @@ fun CofrinhoScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                BotaoAcao("Criar reserva", Icons.Default.Add,) {
-                abrirCriar = true
-            } }
 
+            BotaoAcao("Criar reserva", Icons.Default.Add) {
+                abrirCriar = true
+            }
 
             BotaoAcao("Depositar", Icons.Default.AttachMoney) {
                 abrirDeposito = true
@@ -129,9 +122,7 @@ fun CofrinhoScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
 
                             Text(
@@ -139,17 +130,12 @@ fun CofrinhoScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.End
-                            ) {
-                                Text(
-                                    text = "R$ ${reserva.valorAtual}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
 
+                            Text(
+                                text = "R$ ${reserva.valorAtual}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -178,8 +164,8 @@ fun CofrinhoScreen(
     if (abrirDeposito) {
         DialogDepositar(
             reservas = reservas,
-            onDepositar = { id, valor ->
-                viewModel.depositar(id, valor)
+            onDepositar = { cofrinho, valor ->
+                viewModel.depositar(cofrinho, valor)
                 abrirDeposito = false
             },
             onDismiss = { abrirDeposito = false }
@@ -189,8 +175,8 @@ fun CofrinhoScreen(
     if (abrirRetirada) {
         DialogRetirar(
             reservas = reservas,
-            onRetirar = { id, valor ->
-                viewModel.retirar(id, valor)
+            onRetirar = { cofrinho, valor ->
+                viewModel.retirar(cofrinho, valor)
                 abrirRetirada = false
             },
             onDismiss = { abrirRetirada = false }
@@ -212,8 +198,6 @@ fun BotaoAcao(
         modifier = Modifier
             .size(110.dp)
             .clickable { onClick() }
-            .width(110.dp)
-            .height(100.dp)
             .padding(5.dp)
     ) {
 
@@ -239,6 +223,114 @@ fun BotaoAcao(
 }
 
 @Composable
+fun DialogDepositar(
+    reservas: List<Cofrinho>,
+    onDepositar: (Cofrinho, Double) -> Unit,
+    onDismiss: () -> Unit
+) {
+
+    var valor by remember { mutableStateOf("") }
+    var reservaSelecionada by remember { mutableStateOf<Cofrinho?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Depositar") },
+        text = {
+
+            Column {
+
+                reservas.forEach { reserva ->
+
+                    Button(
+                        onClick = { reservaSelecionada = reserva },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(reserva.nome)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = valor,
+                    onValueChange = { valor = it },
+                    label = { Text("Valor") }
+                )
+            }
+        },
+        confirmButton = {
+
+            Button(
+                onClick = {
+
+                    reservaSelecionada?.let {
+
+                        val deposito = valor.toDoubleOrNull() ?: 0.0
+                        onDepositar(it, deposito)
+                    }
+                }
+            ) {
+                Text("Depositar")
+            }
+        }
+    )
+}
+
+@Composable
+fun DialogRetirar(
+    reservas: List<Cofrinho>,
+    onRetirar: (Cofrinho, Double) -> Unit,
+    onDismiss: () -> Unit
+) {
+
+    var valor by remember { mutableStateOf("") }
+    var reservaSelecionada by remember { mutableStateOf<Cofrinho?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Retirar") },
+        text = {
+
+            Column {
+
+                reservas.forEach { reserva ->
+
+                    Button(
+                        onClick = { reservaSelecionada = reserva },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(reserva.nome)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = valor,
+                    onValueChange = { valor = it },
+                    label = { Text("Valor") }
+                )
+            }
+        },
+        confirmButton = {
+
+            Button(
+                onClick = {
+
+                    reservaSelecionada?.let {
+
+                        val retirada = valor.toDoubleOrNull() ?: 0.0
+                        onRetirar(it, retirada)
+                    }
+                }
+            ) {
+                Text("Retirar")
+            }
+        }
+    )
+}
+
+@Composable
 fun DialogCriarReserva(
     onDismiss: () -> Unit,
     onCriar: (String, Double, Double) -> Unit
@@ -250,7 +342,7 @@ fun DialogCriarReserva(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Criar Reserva") },
+        title = { Text("Criar Cofrinho") },
 
         text = {
 
@@ -259,7 +351,7 @@ fun DialogCriarReserva(
                 OutlinedTextField(
                     value = nome,
                     onValueChange = { nome = it },
-                    label = { Text("Nome da reserva") }
+                    label = { Text("Nome do cofrinho") }
                 )
 
                 OutlinedTextField(
@@ -288,125 +380,7 @@ fun DialogCriarReserva(
                     )
                 }
             ) {
-                Text(
-                    text = "Criar",
-                )
-            }
-        }
-    )
-}
-
-@Composable
-fun DialogDepositar(
-    reservas: List<Reserva>,
-    onDepositar: (Int, Double) -> Unit,
-    onDismiss: () -> Unit
-) {
-
-    var valor by remember { mutableStateOf("") }
-    var reservaSelecionada by remember { mutableStateOf<Reserva?>(null) }
-
-    AlertDialog(
-
-        onDismissRequest = onDismiss,
-
-        title = { Text("Depositar") },
-
-        text = {
-
-            Column {
-
-                reservas.forEach { reserva ->
-
-                    Button(
-                        onClick = { reservaSelecionada = reserva },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(reserva.nome)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                OutlinedTextField(
-                    value = valor,
-                    onValueChange = { valor = it },
-                    label = { Text("Valor") }
-                )
-            }
-        },
-
-        confirmButton = {
-
-            Button(
-                onClick = {
-
-                    reservaSelecionada?.let {
-
-                        val deposito = valor.toDoubleOrNull() ?: 0.0
-                        onDepositar(it.id, deposito)
-                    }
-                }
-            ) {
-                Text("Depositar")
-            }
-        }
-    )
-}
-
-@Composable
-fun DialogRetirar(
-    reservas: List<Reserva>,
-    onRetirar: (Int, Double) -> Unit,
-    onDismiss: () -> Unit
-) {
-
-    var valor by remember { mutableStateOf("") }
-    var reservaSelecionada by remember { mutableStateOf<Reserva?>(null) }
-
-    AlertDialog(
-
-        onDismissRequest = onDismiss,
-
-        title = { Text("Retirar") },
-
-        text = {
-
-            Column {
-
-                reservas.forEach { reserva ->
-
-                    Button(
-                        onClick = { reservaSelecionada = reserva },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(reserva.nome)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                OutlinedTextField(
-                    value = valor,
-                    onValueChange = { valor = it },
-                    label = { Text("Valor") }
-                )
-            }
-        },
-
-        confirmButton = {
-
-            Button(
-                onClick = {
-
-                    reservaSelecionada?.let {
-
-                        val retirada = valor.toDoubleOrNull() ?: 0.0
-                        onRetirar(it.id, retirada)
-                    }
-                }
-            ) {
-                Text("Retirar")
+                Text("Criar")
             }
         }
     )

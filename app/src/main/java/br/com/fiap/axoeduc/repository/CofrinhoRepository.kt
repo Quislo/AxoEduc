@@ -1,49 +1,43 @@
 package br.com.fiap.axoeduc.repository
 
+import br.com.fiap.axoeduc.dao.CofrinhoDAO
+import br.com.fiap.axoeduc.model.Cofrinho
 import br.com.fiap.axoeduc.model.Reserva
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class CofrinhoRepository {
+class CofrinhoRepository(private val dao: CofrinhoDAO) {
 
-    private val _reservas = MutableStateFlow<List<Reserva>>(emptyList())
-    val reservas: StateFlow<List<Reserva>> = _reservas
+    val reservas: Flow<List<Cofrinho>> = dao.listar()
 
-    private var nextId = 1
+    suspend fun criarReserva(nome: String, meta: Double, valorInicial: Double) {
 
-    fun criarReserva(nome: String, meta: Double, valorInicial: Double) {
-
-        val novaReserva = Reserva(
-            id = nextId++,
+        val novo = Cofrinho(
+            id = 0,
             nome = nome,
             meta = meta,
             valorAtual = valorInicial
         )
 
-        _reservas.value = _reservas.value + novaReserva
+        dao.salvar(novo)
     }
 
-    fun depositar(id: Int, valor: Double) {
+    suspend fun depositar(cofrinho: Cofrinho, valor: Double) {
 
-        _reservas.value = _reservas.value.map {
+        val atualizado = cofrinho.copy(
+            valorAtual = cofrinho.valorAtual + valor
+        )
 
-            if (it.id == id) {
-                it.copy(valorAtual = it.valorAtual + valor)
-            } else {
-                it
-            }
-        }
+        dao.atualizar(atualizado)
     }
 
-    fun retirar(id: Int, valor: Double) {
+    suspend fun retirar(cofrinho: Cofrinho, valor: Double) {
 
-        _reservas.value = _reservas.value.map {
+        val atualizado = cofrinho.copy(
+            valorAtual = cofrinho.valorAtual - valor
+        )
 
-            if (it.id == id) {
-                it.copy(valorAtual = it.valorAtual - valor)
-            } else {
-                it
-            }
-        }
+        dao.atualizar(atualizado)
     }
 }
