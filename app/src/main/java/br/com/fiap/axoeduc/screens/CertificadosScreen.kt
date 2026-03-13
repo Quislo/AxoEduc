@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.fiap.axoeduc.model.Certificado
 import br.com.fiap.axoeduc.viewmodel.CertificadoViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 val AzulCard = Color(0xFF3F3DCE)
 
@@ -40,7 +42,7 @@ fun CertificadosScreen(
 
     val viewModel: CertificadoViewModel = viewModel()
 
-
+    val listaCertificados by viewModel.certificados.collectAsState()
 
     Column(
         modifier = Modifier
@@ -61,9 +63,8 @@ fun CertificadosScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
-            items(viewModel.certificados) { certificado ->
-                CardCertificado(certificado)
-            }
+            items(listaCertificados) { certificado ->
+                CardCertificado(certificado)            }
 
         }
     }

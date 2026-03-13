@@ -31,5 +31,6 @@ class CursosViewModel : ViewModel() {
                 curso
             }
         }
+        br.com.fiap.axoeduc.repository.CertificadoRepository.desbloquear(titulo)
     }
 }
