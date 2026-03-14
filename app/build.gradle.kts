@@ -5,6 +5,10 @@ plugins {
     alias (libs.plugins.ksp)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "br.com.fiap.axoeduc"
     compileSdk = 36
@@ -64,6 +68,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Room dependencies
     implementation(libs.androidx.room.runtime)

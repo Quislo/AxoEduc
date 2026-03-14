@@ -11,5 +11,5 @@ object ScreenRoutes {
     const val CALCULADORA_RESULTADOS = "calculadora_resultado"
     const val CERTIFICADOS = "certificados"
     const val INVESTIMENTOS = "investimentos"
-    const val PERFIL = "perfil"
+    const val PERFIL = "perfil/{usuarioId}"
 }

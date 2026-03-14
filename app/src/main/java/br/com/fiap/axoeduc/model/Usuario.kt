@@ -21,5 +21,7 @@ data class Usuario(
 
     val rendaMensal: Double,
 
-    val senha: String
+    val senha: String,
+
+    val fotoPerfil: String? = null
 )

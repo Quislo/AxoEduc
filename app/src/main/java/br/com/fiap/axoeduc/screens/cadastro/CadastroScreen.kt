@@ -45,7 +45,7 @@ import androidx.compose.runtime.remember
 
 @Composable
 fun CadastroScreen(
-    onCadastroSucesso: () -> Unit = {},
+    onCadastroSucesso: (usuarioId: Int) -> Unit = {},
     onVoltarLogin: () -> Unit = {},
     viewModel: CadastroViewModel = viewModel()
 ) {
@@ -54,7 +54,7 @@ fun CadastroScreen(
 
     LaunchedEffect(viewModel.cadastroRealizado) {
         if (viewModel.cadastroRealizado) {
-            onCadastroSucesso()
+            onCadastroSucesso(viewModel.usuarioCriadoId)
         }
     }
 

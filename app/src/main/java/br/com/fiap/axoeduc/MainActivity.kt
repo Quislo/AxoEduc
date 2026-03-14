@@ -7,12 +7,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import br.com.fiap.axoeduc.ui.theme.AxoEducTheme
 import br.com.fiap.axoeduc.components.BottomMenu
 import br.com.fiap.axoeduc.components.CustomTopBar
@@ -31,8 +38,10 @@ import br.com.fiap.axoeduc.dao.AppDatabase
 import br.com.fiap.axoeduc.repository.UsuarioRepository
 import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
+import br.com.fiap.axoeduc.viewmodel.PerfilViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,12 +62,30 @@ class MainActivity : ComponentActivity() {
                 val database = AppDatabase.getDatabase(context)
                 val usuarioRepository = UsuarioRepository(database.usuarioDao())
 
+                var usuarioLogadoId by remember { mutableIntStateOf(0) }
+                var fotoPerfilUri by remember { mutableStateOf<String?>(null) }
+
+                LaunchedEffect(usuarioLogadoId) {
+                    if (usuarioLogadoId > 0) {
+                        usuarioRepository.buscarPorId(usuarioLogadoId).collectLatest { usuario ->
+                            fotoPerfilUri = usuario?.fotoPerfil
+                        }
+                    } else {
+                        fotoPerfilUri = null
+                    }
+                }
+
+                fun navegarParaPerfil() {
+                    navController.navigate("perfil/$usuarioLogadoId")
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
                         if (showBars) {
                             CustomTopBar(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) }
+                                onProfileClick = { navegarParaPerfil() },
+                                fotoPerfilUri = fotoPerfilUri
                             )
                         }
                     },
@@ -80,22 +107,31 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         composable(ScreenRoutes.LOGIN) {
+                            val loginViewModel: br.com.fiap.axoeduc.viewmodel.login.LoginViewModel = viewModel(
+                                factory = LoginViewModelFactory(usuarioRepository)
+                            )
+
                             LoginScreen(
                                 onLoginSuccess = {
+                                    // Captura o ID do usuário logado antes de navegar
+                                    loginViewModel.usuarioLogadoId?.let { id ->
+                                        usuarioLogadoId = id
+                                    }
                                     navController.navigate(ScreenRoutes.CURSOS) {
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
                                 onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
-                                viewModel = viewModel(factory = LoginViewModelFactory(usuarioRepository))
+                                viewModel = loginViewModel
                             )
                         }
 
                         composable(ScreenRoutes.CADASTRO) {
                             CadastroScreen(
-                                onCadastroSucesso = {
-                                    navController.navigate(ScreenRoutes.LOGIN) {
-                                        popUpTo(ScreenRoutes.CADASTRO) { inclusive = true }
+                                onCadastroSucesso = { usuarioId ->
+                                    usuarioLogadoId = usuarioId
+                                    navController.navigate(ScreenRoutes.CURSOS) {
+                                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
                                 onVoltarLogin = { navController.popBackStack() },
@@ -103,14 +139,25 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable(ScreenRoutes.PERFIL) {
+                        composable(
+                            route = ScreenRoutes.PERFIL,
+                            arguments = listOf(
+                                navArgument("usuarioId") { type = NavType.IntType }
+                            )
+                        ) { backStackEntry ->
+                            val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+
                             PerfilScreen(
                                 onVoltarClick = { navController.popBackStack() },
                                 onSairClick = {
+                                    usuarioLogadoId = 0
                                     navController.navigate(ScreenRoutes.LOGIN) {
                                         popUpTo(0) { inclusive = true }
                                     }
-                                }
+                                },
+                                viewModel = viewModel(
+                                    factory = PerfilViewModelFactory(usuarioRepository, usuarioId)
+                                )
                             )
                         }
 
@@ -120,7 +167,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.FERRAMENTAS) {
                             FerramentasScreen(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
+                                onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
@@ -132,7 +179,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.COFRINHO) {
                             CofrinhoScreen(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
+                                onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
@@ -141,7 +188,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CALCULADORA) {
                             CalculadoraJurosScreen(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
+                                onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },
@@ -151,7 +198,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CALCULADORA_RESULTADOS) {
                             CalculadoraJurosResultadoScreen(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
+                                onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
@@ -160,7 +207,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CERTIFICADOS) {
                             CertificadosScreen(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
+                                onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) }
@@ -169,7 +216,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.INVESTIMENTOS) {
                             InvestimentosScreen(
-                                onProfileClick = { navController.navigate(ScreenRoutes.PERFIL) },
+                                onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
                                 onCertificadosClick = { navController.navigate(ScreenRoutes.CERTIFICADOS) },

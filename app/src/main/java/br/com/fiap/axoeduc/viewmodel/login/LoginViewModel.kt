@@ -27,6 +27,8 @@ class LoginViewModel(private val repository: UsuarioRepository) : ViewModel() {
         private set
     var loginRealizado by mutableStateOf(false)
         private set
+    var usuarioLogadoId by mutableStateOf<Int?>(null)
+        private set
 
     /** Chamado pelo callback `onValueChange` do EmailInput. */
     fun onEmailChange(novoValor: String) {
@@ -92,6 +94,7 @@ class LoginViewModel(private val repository: UsuarioRepository) : ViewModel() {
                 }
 
                 // Se chegou aqui, E-mail existe e a senha bate.
+                usuarioLogadoId = usuarioBD.id
                 loginRealizado = true
 
             } catch (e: Exception) {

@@ -55,6 +55,8 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
         private set
     var cadastroRealizado by mutableStateOf(false)
         private set
+    var usuarioCriadoId by mutableIntStateOf(0)
+        private set
 
     // Constantes
     val totalEtapas = 3
@@ -212,7 +214,7 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
                 val rendaDouble = (rendaMensal.toLongOrNull() ?: 0L) / 100.0
 
                 // 3. Salva no banco de dados local
-                repository.cadastrar(
+                val novoId = repository.cadastrar(
                     nome = nome.trim(),
                     email = email.trim(),
                     dataNascimento = dataFormatada,
@@ -221,6 +223,7 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
                 )
 
                 // 4. Emite Sucesso para a View navegar
+                usuarioCriadoId = novoId.toInt()
                 cadastroRealizado = true
 
             } catch (e: Exception) {
