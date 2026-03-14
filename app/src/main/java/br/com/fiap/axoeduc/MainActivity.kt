@@ -34,9 +34,11 @@ import br.com.fiap.axoeduc.screens.InvestimentosScreen
 import br.com.fiap.axoeduc.screens.LoginScreen
 import br.com.fiap.axoeduc.screens.PerfilScreen
 import br.com.fiap.axoeduc.screens.cadastro.CadastroScreen
+import br.com.fiap.axoeduc.screens.cadastro.CompletarCadastroScreen
 import br.com.fiap.axoeduc.dao.AppDatabase
 import br.com.fiap.axoeduc.repository.UsuarioRepository
 import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModelFactory
+import br.com.fiap.axoeduc.viewmodel.cadastro.CompletarCadastroViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.PerfilViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,11 +58,16 @@ class MainActivity : ComponentActivity() {
 
                 val showBars = currentRoute != ScreenRoutes.LOGIN &&
                         currentRoute != ScreenRoutes.CADASTRO &&
+                        currentRoute != ScreenRoutes.COMPLETAR_CADASTRO &&
                         currentRoute != ScreenRoutes.PERFIL
 
                 val context = LocalContext.current
                 val database = AppDatabase.getDatabase(context)
-                val usuarioRepository = UsuarioRepository(database.usuarioDao())
+                val usuarioRepository = UsuarioRepository(
+                    dao = database.usuarioDao(),
+                    credencialEmailDao = database.credencialEmailDao(),
+                    credencialGoogleDao = database.credencialGoogleDao()
+                )
 
                 var usuarioLogadoId by remember { mutableIntStateOf(0) }
                 var fotoPerfilUri by remember { mutableStateOf<String?>(null) }
@@ -122,6 +129,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
+                                onCadastroIncompleto = { id ->
+                                    usuarioLogadoId = id
+                                    navController.navigate("completar_cadastro/$id") {
+                                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
+                                    }
+                                },
                                 viewModel = loginViewModel
                             )
                         }
@@ -136,6 +149,26 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onVoltarLogin = { navController.popBackStack() },
                                 viewModel = viewModel(factory = CadastroViewModelFactory(usuarioRepository))
+                            )
+                        }
+
+                        composable(
+                            route = ScreenRoutes.COMPLETAR_CADASTRO,
+                            arguments = listOf(
+                                navArgument("usuarioId") { type = NavType.IntType }
+                            )
+                        ) { backStackEntry ->
+                            val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+
+                            CompletarCadastroScreen(
+                                onCadastroCompleto = {
+                                    navController.navigate(ScreenRoutes.CURSOS) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                viewModel = viewModel(
+                                    factory = CompletarCadastroViewModelFactory(usuarioRepository, usuarioId)
+                                )
                             )
                         }
 
