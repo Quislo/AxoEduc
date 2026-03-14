@@ -38,12 +38,17 @@ fun EtapaDadosAcesso(
     onConsentimentoLgpdChange: (Boolean) -> Unit,
     onMostrarPolitica: () -> Unit,
     onMostrarTermos: () -> Unit,
-    enviado: Boolean
+    emailErro: String? = null,
+    senhaErro: String? = null,
+    confirmarSenhaErro: String? = null,
+    onEmailFocusLost: (() -> Unit)? = null,
 ) {
     EmailInput(
         email = email,
         onValueChange = onEmailChange,
-        enviado = enviado
+        isError = emailErro != null,
+        errorMessage = emailErro,
+        onFocusLost = onEmailFocusLost,
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -51,16 +56,17 @@ fun EtapaDadosAcesso(
     SenhaInput(
         senha = senha,
         onValueChange = onSenhaChange,
-        enviado = enviado
+        isError = senhaErro != null,
+        errorMessage = senhaErro,
     )
 
     Spacer(modifier = Modifier.height(4.dp))
 
     ConfirmarSenhaInput(
         confirmarSenha = confirmarSenha,
-        senhaOriginal = senha,
         onValueChange = onConfirmarSenhaChange,
-        enviado = enviado
+        isError = confirmarSenhaErro != null,
+        errorMessage = confirmarSenhaErro,
     )
 
     Spacer(modifier = Modifier.height(8.dp))
