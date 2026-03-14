@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import br.com.fiap.axoeduc.model.Usuario
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface UsuarioDAO {
@@ -28,13 +29,9 @@ interface UsuarioDAO {
     @Query("UPDATE tb_usuario SET email = :email WHERE id = :id")
     suspend fun atualizarEmail(id: Int, email: String)
 
-    @Query("UPDATE tb_usuario SET senha = :senha WHERE id = :id")
-    suspend fun atualizarSenha(id: Int, senha: String)
-
-    @Query("SELECT senha FROM tb_usuario WHERE id = :id")
-    suspend fun buscarSenhaPorId(id: Int): String?
-
     @Query("UPDATE tb_usuario SET fotoPerfil = :uri WHERE id = :id")
     suspend fun atualizarFotoPerfil(id: Int, uri: String?)
 
+    @Query("UPDATE tb_usuario SET rendaMensal = :renda, dataNascimento = :dataNascimento WHERE id = :id")
+    suspend fun completarCadastro(id: Int, renda: Double, dataNascimento: LocalDate)
 }

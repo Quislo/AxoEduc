@@ -17,11 +17,9 @@ data class Usuario(
 
     val email: String,
 
-    val dataNascimento: LocalDate,
+    val dataNascimento: LocalDate? = null,
 
-    val rendaMensal: Double,
-
-    val senha: String,
+    val rendaMensal: Double = 0.0,
 
     val fotoPerfil: String? = null
 )

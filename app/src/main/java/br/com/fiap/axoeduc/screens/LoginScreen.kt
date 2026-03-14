@@ -1,5 +1,6 @@
 package br.com.fiap.axoeduc.screens
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -38,22 +39,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.fiap.axoeduc.R
 import br.com.fiap.axoeduc.components.inputs.EmailInput
 import br.com.fiap.axoeduc.components.inputs.SenhaInput
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModel
+import br.com.fiap.axoeduc.BuildConfig
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -62,6 +71,7 @@ import kotlin.math.roundToInt
 fun LoginScreen(
     onLoginSuccess: () -> Unit = {},
     onCriarConta: () -> Unit = {},
+    onCadastroIncompleto: (usuarioId: Int) -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
     // Controla visibilidade do banner de erro inline
@@ -70,10 +80,19 @@ fun LoginScreen(
     // Animatable para o efeito de "shake" horizontal nos inputs
     val shakeOffset = remember { Animatable(0f) }
 
+    // Google Sign-In
+    val contexto = LocalContext.current
+    val credentialManager = remember { CredentialManager.create(contexto) }
+    val escopo = rememberCoroutineScope()
+
     // Dispara navegação ao login bem-sucedido
     LaunchedEffect(viewModel.loginRealizado) {
         if (viewModel.loginRealizado) {
-            onLoginSuccess()
+            if (viewModel.cadastroIncompleto) {
+                onCadastroIncompleto(viewModel.usuarioLogadoId ?: 0)
+            } else {
+                onLoginSuccess()
+            }
         }
     }
 
@@ -266,7 +285,45 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
-                onClick = {},
+                onClick = {
+                    escopo.launch {
+                        try {
+                            val googleIdOption = GetGoogleIdOption.Builder()
+                                .setFilterByAuthorizedAccounts(false)
+                                .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                                .build()
+
+                            val request = GetCredentialRequest.Builder()
+                                .addCredentialOption(googleIdOption)
+                                .build()
+
+                            val result = credentialManager.getCredential(
+                                contexto as Activity,
+                                request
+                            )
+                            val credential = result.credential
+
+                            if (credential is CustomCredential &&
+                                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                            ) {
+                                val googleCredential =
+                                    GoogleIdTokenCredential.createFrom(credential.data)
+                                viewModel.loginComGoogle(
+                                    nome = googleCredential.displayName ?: "",
+                                    email = googleCredential.id,
+                                    googleId = googleCredential.idToken,
+                                    fotoPerfil = googleCredential.profilePictureUri?.toString()
+                                )
+                            }
+                        } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+                            // Usuário cancelou — sem ação
+                        } catch (e: Exception) {
+                            android.util.Log.e("LoginScreen", "Google Sign-In falhou", e)
+                            viewModel.errorMessage = "Erro no Google Sign-In: ${e.message}"
+                        }
+                    }
+                },
+                enabled = !viewModel.googleLoginEmProgresso && !viewModel.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -276,21 +333,29 @@ fun LoginScreen(
                 ),
                 border = BorderStroke(1.dp, Color(0xAAFFFFFF))
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.google_icon),
-                    contentDescription = "Google",
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "Entrar com Google",
-                    fontSize = 16.sp,
-                    color = Color(0xFF606060),
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.size(24.dp))
+                if (viewModel.googleLoginEmProgresso) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color(0xFF606060),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.google_icon),
+                        contentDescription = "Google",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "Entrar com Google",
+                        fontSize = 16.sp,
+                        color = Color(0xFF606060),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.size(24.dp))
+                }
             }
         }
 

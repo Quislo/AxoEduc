@@ -24,10 +24,14 @@ class LoginViewModel(private val repository: UsuarioRepository) : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
     var errorMessage by mutableStateOf<String?>(null)
-        private set
     var loginRealizado by mutableStateOf(false)
         private set
     var usuarioLogadoId by mutableStateOf<Int?>(null)
+        private set
+
+    var googleLoginEmProgresso by mutableStateOf(false)
+        private set
+    var cadastroIncompleto by mutableStateOf(false)
         private set
 
     /** Chamado pelo callback `onValueChange` do EmailInput. */
@@ -87,20 +91,44 @@ class LoginViewModel(private val repository: UsuarioRepository) : ViewModel() {
 
                 val usuarioBD = repository.buscarPorEmail(email.trim())
 
-                // Regra de Segurança: Mensagem genérica se der nulo (não existe) ou se a senha for diferente.
-                if (usuarioBD == null || usuarioBD.senha != senha) {
+                // Busca a senha na tabela de credenciais
+                val senhaBD = repository.buscarSenhaPorEmail(email.trim())
+
+                // Regra de Segurança: Mensagem genérica se usuário não existe ou senha incorreta
+                if (usuarioBD == null || senhaBD == null || senhaBD != senha) {
                     errorMessage = "E-mail ou senha incorretos."
                     return@launch
                 }
 
                 // Se chegou aqui, E-mail existe e a senha bate.
                 usuarioLogadoId = usuarioBD.id
+                cadastroIncompleto = repository.isCadastroIncompleto(usuarioBD)
                 loginRealizado = true
 
             } catch (e: Exception) {
                 errorMessage = "Falha ao consultar banco de dados: ${e.message}"
             } finally {
                 isLoading = false
+            }
+        }
+    }
+
+    /**
+     * Login via Google — cria ou busca o usuário e sinaliza se o cadastro está incompleto.
+     */
+    fun loginComGoogle(nome: String, email: String, googleId: String, fotoPerfil: String?) {
+        viewModelScope.launch {
+            try {
+                googleLoginEmProgresso = true
+                errorMessage = null
+                val usuario = repository.cadastrarOuBuscarGoogle(nome, email, googleId, fotoPerfil)
+                usuarioLogadoId = usuario.id
+                cadastroIncompleto = repository.isCadastroIncompleto(usuario)
+                loginRealizado = true
+            } catch (e: Exception) {
+                errorMessage = "Falha no login com Google: ${e.message}"
+            } finally {
+                googleLoginEmProgresso = false
             }
         }
     }
