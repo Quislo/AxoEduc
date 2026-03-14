@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 class UsuarioRepository(private val dao: UsuarioDAO) {
 
-    suspend fun cadastrar(nome: String, email: String, dataNascimento: LocalDate, rendaMensal: Double, senha: String) {
+    suspend fun cadastrar(nome: String, email: String, dataNascimento: LocalDate, rendaMensal: Double, senha: String): Long {
 
         val novo = Usuario(
             id = 0,
@@ -18,7 +18,7 @@ class UsuarioRepository(private val dao: UsuarioDAO) {
             senha = senha
         )
 
-        dao.salvar(novo)
+        return dao.salvar(novo)
     }
 
     fun buscarPorId(id: Int): Flow<Usuario?> {
@@ -31,5 +31,31 @@ class UsuarioRepository(private val dao: UsuarioDAO) {
 
     suspend fun atualizar(usuario: Usuario) {
         dao.atualizar(usuario)
+    }
+
+    suspend fun atualizarNome(id: Int, nome: String) {
+        dao.atualizarNome(id, nome)
+    }
+
+    suspend fun atualizarEmail(id: Int, email: String): Result<Unit> {
+        val existente = dao.buscarPorEmail(email)
+        if (existente != null && existente.id != id) {
+            return Result.failure(Exception("E-mail já vinculado a outra conta"))
+        }
+        dao.atualizarEmail(id, email)
+        return Result.success(Unit)
+    }
+
+    suspend fun atualizarSenha(id: Int, senhaAtual: String, novaSenha: String): Result<Unit> {
+        val senhaBD = dao.buscarSenhaPorId(id)
+        if (senhaBD != senhaAtual) {
+            return Result.failure(Exception("Senha atual incorreta"))
+        }
+        dao.atualizarSenha(id, novaSenha)
+        return Result.success(Unit)
+    }
+
+    suspend fun atualizarFotoPerfil(id: Int, uri: String?) {
+        dao.atualizarFotoPerfil(id, uri)
     }
 }

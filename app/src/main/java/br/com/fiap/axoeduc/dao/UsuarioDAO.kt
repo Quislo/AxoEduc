@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface UsuarioDAO {
 
     @Insert
-    suspend fun salvar(usuario: Usuario)
+    suspend fun salvar(usuario: Usuario): Long
 
     @Query("SELECT * FROM tb_usuario WHERE id = :id")
     fun buscarPorId(id: Int): Flow<Usuario?>
@@ -21,5 +21,20 @@ interface UsuarioDAO {
 
     @Update
     suspend fun atualizar(usuario: Usuario)
+
+    @Query("UPDATE tb_usuario SET nome = :nome WHERE id = :id")
+    suspend fun atualizarNome(id: Int, nome: String)
+
+    @Query("UPDATE tb_usuario SET email = :email WHERE id = :id")
+    suspend fun atualizarEmail(id: Int, email: String)
+
+    @Query("UPDATE tb_usuario SET senha = :senha WHERE id = :id")
+    suspend fun atualizarSenha(id: Int, senha: String)
+
+    @Query("SELECT senha FROM tb_usuario WHERE id = :id")
+    suspend fun buscarSenhaPorId(id: Int): String?
+
+    @Query("UPDATE tb_usuario SET fotoPerfil = :uri WHERE id = :id")
+    suspend fun atualizarFotoPerfil(id: Int, uri: String?)
 
 }
