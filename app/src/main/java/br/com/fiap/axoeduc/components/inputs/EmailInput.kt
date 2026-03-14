@@ -1,6 +1,5 @@
 package br.com.fiap.axoeduc.components.inputs
 
-import android.util.Patterns
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,10 +9,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -25,35 +20,32 @@ import androidx.compose.ui.unit.sp
 fun EmailInput(
     email: String,
     onValueChange: (String) -> Unit,
-    enviado: Boolean
+    modifier: Modifier = Modifier,
+    label: String = "E-mail",
+    placeholder: String? = null,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    enabled: Boolean = true,
+    onFocusLost: (() -> Unit)? = null,
 ) {
-    var perdeuFoco by remember { mutableStateOf(false) }
-
-    val mensagemErro = when {
-        enviado && email.isBlank() -> "Campo obrigatório"
-        perdeuFoco && email.isNotBlank() && !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "E-mail inválido"
-        enviado && !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "E-mail inválido"
-        else -> null
-    }
-
-    val invalido = mensagemErro != null
-
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = email,
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (!focusState.isFocused && email.isNotEmpty()) {
-                        perdeuFoco = true
-                    }
-                },
-            label = {
-                Text("E-mail")
-            },
+                .then(
+                    if (onFocusLost != null) {
+                        Modifier.onFocusChanged { focusState ->
+                            if (!focusState.isFocused) onFocusLost()
+                        }
+                    } else Modifier
+                ),
+            label = { Text(label) },
+            placeholder = placeholder?.let { { Text(it, color = Color(0x99FFFFFF)) } },
             singleLine = true,
-            isError = invalido,
+            enabled = enabled,
+            isError = isError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -68,13 +60,18 @@ fun EmailInput(
                 focusedTextColor = Color.White,
                 errorBorderColor = Color(0xFFFF6B6B),
                 errorLabelColor = Color(0xFFFF6B6B),
-                errorCursorColor = Color(0xFFFF6B6B)
+                errorCursorColor = Color(0xFFFF6B6B),
+                errorTextColor = Color.White,
+                disabledContainerColor = Color(0x0DFFFFFF),
+                disabledBorderColor = Color(0x55FFFFFF),
+                disabledLabelColor = Color(0x55FFFFFF),
+                disabledTextColor = Color(0x55FFFFFF),
             )
         )
 
-        if (invalido) {
+        if (isError && errorMessage != null) {
             Text(
-                text = mensagemErro,
+                text = errorMessage,
                 color = Color(0xFFFF6B6B),
                 fontSize = 12.sp,
                 modifier = Modifier.padding(start = 12.dp, top = 4.dp)

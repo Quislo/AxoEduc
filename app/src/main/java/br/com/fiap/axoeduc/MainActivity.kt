@@ -27,6 +27,12 @@ import br.com.fiap.axoeduc.screens.InvestimentosScreen
 import br.com.fiap.axoeduc.screens.LoginScreen
 import br.com.fiap.axoeduc.screens.PerfilScreen
 import br.com.fiap.axoeduc.screens.cadastro.CadastroScreen
+import br.com.fiap.axoeduc.dao.AppDatabase
+import br.com.fiap.axoeduc.repository.UsuarioRepository
+import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModelFactory
+import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +48,10 @@ class MainActivity : ComponentActivity() {
                 val showBars = currentRoute != ScreenRoutes.LOGIN &&
                         currentRoute != ScreenRoutes.CADASTRO &&
                         currentRoute != ScreenRoutes.PERFIL
+
+                val context = LocalContext.current
+                val database = AppDatabase.getDatabase(context)
+                val usuarioRepository = UsuarioRepository(database.usuarioDao())
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -76,7 +86,8 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
-                                onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) }
+                                onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
+                                viewModel = viewModel(factory = LoginViewModelFactory(usuarioRepository))
                             )
                         }
 
@@ -87,7 +98,8 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(ScreenRoutes.CADASTRO) { inclusive = true }
                                     }
                                 },
-                                onVoltarLogin = { navController.popBackStack() }
+                                onVoltarLogin = { navController.popBackStack() },
+                                viewModel = viewModel(factory = CadastroViewModelFactory(usuarioRepository))
                             )
                         }
 

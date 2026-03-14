@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +37,11 @@ import br.com.fiap.axoeduc.components.dialogs.DialogoPoliticaPrivacidade
 import br.com.fiap.axoeduc.components.dialogs.DialogoRendaAlta
 import br.com.fiap.axoeduc.components.dialogs.DialogoTermosUso
 import br.com.fiap.axoeduc.components.IndicadorProgresso
-import br.com.fiap.axoeduc.viewmodel.CadastroViewModel
+import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModel
+
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 
 @Composable
 fun CadastroScreen(
@@ -42,6 +49,20 @@ fun CadastroScreen(
     onVoltarLogin: () -> Unit = {},
     viewModel: CadastroViewModel = viewModel()
 ) {
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel.cadastroRealizado) {
+        if (viewModel.cadastroRealizado) {
+            onCadastroSucesso()
+        }
+    }
+
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(message = msg)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -160,23 +181,17 @@ fun CadastroScreen(
                                 confirmarSenha = viewModel.confirmarSenha,
                                 consentimentoOpenFinance = viewModel.consentimentoOpenFinance,
                                 consentimentoLgpd = viewModel.consentimentoLgpd,
-                                onEmailChange = {
-                                    viewModel.email = it
-                                    viewModel.enviado = false
-                                },
-                                onSenhaChange = {
-                                    viewModel.senha = it
-                                    viewModel.enviado = false
-                                },
-                                onConfirmarSenhaChange = {
-                                    viewModel.confirmarSenha = it
-                                    viewModel.enviado = false
-                                },
+                                onEmailChange = { viewModel.onEmailChange(it) },
+                                onSenhaChange = { viewModel.onSenhaChange(it) },
+                                onConfirmarSenhaChange = { viewModel.onConfirmarSenhaChange(it) },
                                 onConsentimentoOpenFinanceChange = { viewModel.consentimentoOpenFinance = it },
                                 onConsentimentoLgpdChange = { viewModel.consentimentoLgpd = it },
                                 onMostrarPolitica = { viewModel.mostrarPoliticaPrivacidade = true },
                                 onMostrarTermos = { viewModel.mostrarTermosUso = true },
-                                enviado = viewModel.enviado
+                                emailErro = viewModel.emailErro,
+                                senhaErro = viewModel.senhaErro,
+                                confirmarSenhaErro = viewModel.confirmarSenhaErro,
+                                onEmailFocusLost = { viewModel.onEmailFocusLost() },
                             )
                         }
                     }
@@ -214,11 +229,9 @@ fun CadastroScreen(
                 // Botão Próximo / Criar conta
                 Button(
                     onClick = {
-                        if (viewModel.avancarEtapa()) {
-                            onCadastroSucesso()
-                        }
+                        viewModel.avancarEtapa()
                     },
-                    enabled = viewModel.isEtapaValida(),
+                    enabled = viewModel.isEtapaValida() && !viewModel.isLoading,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF3030D6),
                         disabledContainerColor = Color(0x663030D6),
@@ -230,12 +243,20 @@ fun CadastroScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = if (viewModel.etapaAtual < viewModel.totalEtapas - 1) "Próximo" else "Criar conta",
-                        fontSize = 16.sp,
-                        color = Color(0xFFFFFFFF),
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (viewModel.isLoading && viewModel.etapaAtual == viewModel.totalEtapas - 1) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = if (viewModel.etapaAtual < viewModel.totalEtapas - 1) "Próximo" else "Criar conta",
+                            fontSize = 16.sp,
+                            color = Color(0xFFFFFFFF),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
@@ -294,6 +315,11 @@ fun CadastroScreen(
         DialogoTermosUso(
             mostrar = viewModel.mostrarTermosUso,
             onFechar = { viewModel.mostrarTermosUso = false }
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp)
         )
 
     }

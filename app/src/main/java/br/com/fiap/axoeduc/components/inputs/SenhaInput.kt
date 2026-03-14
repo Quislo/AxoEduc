@@ -30,42 +30,33 @@ import androidx.compose.ui.unit.sp
 fun SenhaInput(
     senha: String,
     onValueChange: (String) -> Unit,
-    enviado: Boolean
+    modifier: Modifier = Modifier,
+    label: String = "Senha",
+    placeholder: String = "Digite sua senha",
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    enabled: Boolean = true,
 ) {
-    var senhaVisivel by remember {
-        mutableStateOf(false)
-    }
+    var senhaVisivel by remember { mutableStateOf(false) }
 
-    val mensagemErro = if (enviado && senha.isBlank()) "Campo obrigatório" else null
-    val invalido = mensagemErro != null
-
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = senha,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Senha")
-            },
+            label = { Text(label) },
+            placeholder = { Text(placeholder, color = Color(0x99FFFFFF)) },
             singleLine = true,
-            isError = invalido,
-            placeholder = {
-                Text("Digite sua senha", color = Color(0x99FFFFFF))
-            },
+            enabled = enabled,
+            isError = isError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                val icone = if (senhaVisivel)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
-
-                val descricao = if (senhaVisivel) "Ocultar senha" else "Mostrar senha"
-
                 IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
                     Icon(
-                        imageVector = icone,
-                        contentDescription = descricao,
-                        tint = Color(0xCCFFFFFF)
+                        imageVector = if (senhaVisivel) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha",
+                        tint = if (isError) Color(0xFFFF6B6B) else Color(0xCCFFFFFF)
                     )
                 }
             },
@@ -82,13 +73,18 @@ fun SenhaInput(
                 focusedTextColor = Color.White,
                 errorBorderColor = Color(0xFFFF6B6B),
                 errorLabelColor = Color(0xFFFF6B6B),
-                errorCursorColor = Color(0xFFFF6B6B)
+                errorCursorColor = Color(0xFFFF6B6B),
+                errorTextColor = Color.White,
+                disabledContainerColor = Color(0x0DFFFFFF),
+                disabledBorderColor = Color(0x55FFFFFF),
+                disabledLabelColor = Color(0x55FFFFFF),
+                disabledTextColor = Color(0x55FFFFFF),
             )
         )
 
-        if (invalido) {
+        if (isError && errorMessage != null) {
             Text(
-                text = mensagemErro,
+                text = errorMessage,
                 color = Color(0xFFFF6B6B),
                 fontSize = 12.sp,
                 modifier = Modifier.padding(start = 12.dp, top = 4.dp)
