@@ -72,13 +72,16 @@ class MainActivity : ComponentActivity() {
                 var usuarioLogadoId by remember { mutableIntStateOf(0) }
                 var fotoPerfilUri by remember { mutableStateOf<String?>(null) }
 
+                var nomeUsuarioLogado by remember { mutableStateOf("Aluno") }
                 LaunchedEffect(usuarioLogadoId) {
                     if (usuarioLogadoId > 0) {
                         usuarioRepository.buscarPorId(usuarioLogadoId).collectLatest { usuario ->
                             fotoPerfilUri = usuario?.fotoPerfil
+                            nomeUsuarioLogado = usuario?.nome ?: "Aluno"
                         }
                     } else {
                         fotoPerfilUri = null
+                        nomeUsuarioLogado = "Aluno"
                     }
                 }
 
@@ -240,6 +243,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(ScreenRoutes.CERTIFICADOS) {
                             CertificadosScreen(
+                                nomeUsuario = nomeUsuarioLogado,
                                 onProfileClick = { navegarParaPerfil() },
                                 onCursosClick = { navController.navigate(ScreenRoutes.CURSOS) },
                                 onFerramentasClick = { navController.navigate(ScreenRoutes.FERRAMENTAS) },
