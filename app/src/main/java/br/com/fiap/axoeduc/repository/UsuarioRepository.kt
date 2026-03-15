@@ -15,10 +15,6 @@ class UsuarioRepository(
     private val credencialGoogleDao: CredencialGoogleDAO
 ) {
 
-    // ──────────────────────────────────────────
-    //  Cadastro tradicional (email + senha)
-    // ──────────────────────────────────────────
-
     suspend fun cadastrar(
         nome: String,
         email: String,
@@ -35,27 +31,20 @@ class UsuarioRepository(
         )
         val usuarioId = dao.salvar(novo)
 
-        // Salva credencial de email separadamente
         credencialEmailDao.salvar(
-            CredencialEmail(usuarioId = usuarioId.toInt(), senha = senha)
+            CredencialEmail(
+                id = 0,
+                usuarioId = usuarioId.toInt(),
+                senha = senha)
         )
 
         return usuarioId
     }
 
-    // ──────────────────────────────────────────
-    //  Login tradicional (email + senha)
-    // ──────────────────────────────────────────
-
     suspend fun buscarSenhaPorEmail(email: String): String? {
         return credencialEmailDao.buscarSenhaPorEmail(email)
     }
 
-    // ──────────────────────────────────────────
-    //  Google Sign-In
-    // ──────────────────────────────────────────
-
-    /** Cria ou retorna usuário Google. Retorna o Usuario salvo/encontrado. */
     suspend fun cadastrarOuBuscarGoogle(
         nome: String,
         email: String,
@@ -64,17 +53,19 @@ class UsuarioRepository(
     ): Usuario {
         val existente = dao.buscarPorEmail(email)
         if (existente != null) {
-            // Se já existe mas não tem credencial Google, vincula
             val credencialGoogle = credencialGoogleDao.buscarPorUsuarioId(existente.id)
             if (credencialGoogle == null) {
                 credencialGoogleDao.salvar(
-                    CredencialGoogle(usuarioId = existente.id, googleId = googleId)
+                    CredencialGoogle(
+                        id = 0,
+                        usuarioId = existente.id,
+                        googleId = googleId
+                    )
                 )
             }
             return existente
         }
 
-        // Cria novo usuário apenas com dados do Google (renda e dataNasc serão preenchidos depois)
         val novo = Usuario(
             id = 0,
             nome = nome,
@@ -84,25 +75,23 @@ class UsuarioRepository(
         val id = dao.salvar(novo)
 
         credencialGoogleDao.salvar(
-            CredencialGoogle(usuarioId = id.toInt(), googleId = googleId)
+            CredencialGoogle(
+                id = 0,
+                usuarioId = id.toInt(),
+                googleId = googleId
+            )
         )
 
         return novo.copy(id = id.toInt())
     }
 
-    /** Verifica se o cadastro do usuário está incompleto (falta renda/data nasc.) */
     fun isCadastroIncompleto(usuario: Usuario): Boolean {
         return usuario.rendaMensal == 0.0 || usuario.dataNascimento == null
     }
 
-    /** Atualiza renda e data de nascimento após completar cadastro */
     suspend fun completarCadastro(id: Int, renda: Double, dataNascimento: LocalDate) {
         dao.completarCadastro(id, renda, dataNascimento)
     }
-
-    // ──────────────────────────────────────────
-    //  Consultas e atualizações gerais
-    // ──────────────────────────────────────────
 
     fun buscarPorId(id: Int): Flow<Usuario?> {
         return dao.buscarPorId(id)

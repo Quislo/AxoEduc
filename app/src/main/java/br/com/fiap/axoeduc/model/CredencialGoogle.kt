@@ -1,5 +1,6 @@
 package br.com.fiap.axoeduc.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -19,9 +20,12 @@ import androidx.room.PrimaryKey
 )
 data class CredencialGoogle(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @ColumnInfo(name = "id")
+    val id: Int,
 
+    @ColumnInfo(name = "usuarioId")
     val usuarioId: Int,
 
+    @ColumnInfo(name = "googleId")
     val googleId: String
 )
