@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,14 +30,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.fiap.axoeduc.R
 import br.com.fiap.axoeduc.components.IndicadorProgresso
 import br.com.fiap.axoeduc.components.dialogs.DialogoRendaAlta
 import br.com.fiap.axoeduc.viewmodel.cadastro.CompletarCadastroViewModel
+
+
+
+
 
 @Composable
 fun CompletarCadastroScreen(
@@ -70,16 +79,14 @@ fun CompletarCadastroScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Título
-            Text(
-                text = "EFUB",
-                fontSize = 40.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFFFFFFFF),
-                letterSpacing = 4.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+            Image(
+                painter = painterResource(id = R.drawable.lg_educ),
+                contentDescription = "Calculadora",
+                modifier = Modifier
+                    .height(220.dp)
+                    .width(220.dp)
+                    .align(Alignment.CenterHorizontally)
             )
-
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(

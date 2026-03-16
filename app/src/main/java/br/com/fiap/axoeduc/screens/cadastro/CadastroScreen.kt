@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +44,8 @@ import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModel
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.painterResource
+import br.com.fiap.axoeduc.R
 
 @Composable
 fun CadastroScreen(
@@ -78,14 +82,13 @@ fun CadastroScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Título do app
-            Text(
-                text = "EFUB",
-                fontSize = 40.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFFFFFFFF),
-                letterSpacing = 4.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+            Image(
+                painter = painterResource(id = R.drawable.lg_educ),
+                contentDescription = "Calculadora",
+                modifier = Modifier
+                    .height(220.dp)
+                    .width(220.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -325,8 +328,10 @@ fun CadastroScreen(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun CadastroScreenPreview() {
+@Preview(
+    showBackground = true,
+    showSystemUi = true
+)
+@Composable fun CadastroScreenPreview() {
     CadastroScreen()
 }
