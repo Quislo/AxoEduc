@@ -54,7 +54,7 @@ fun CustomTopBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "EFUB",
+                text = "AxoEduc",
                 color = Color.White,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold

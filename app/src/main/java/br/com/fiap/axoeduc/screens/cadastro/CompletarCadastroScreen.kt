@@ -6,24 +6,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -31,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,16 +29,14 @@ import br.com.fiap.axoeduc.components.IndicadorProgresso
 import br.com.fiap.axoeduc.components.dialogs.DialogoRendaAlta
 import br.com.fiap.axoeduc.viewmodel.cadastro.CompletarCadastroViewModel
 
-
-
-
-
 @Composable
 fun CompletarCadastroScreen(
     onCadastroCompleto: () -> Unit = {},
     viewModel: CompletarCadastroViewModel = viewModel()
 ) {
+
     val snackbarHostState = remember { SnackbarHostState() }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(viewModel.cadastroCompleto) {
         if (viewModel.cadastroCompleto) {
@@ -70,23 +55,23 @@ fun CompletarCadastroScreen(
             .fillMaxSize()
             .background(Color(0xFF4F67C6))
     ) {
+
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 32.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Título
+
             Image(
                 painter = painterResource(id = R.drawable.lg_educ),
                 contentDescription = "Calculadora",
                 modifier = Modifier
                     .height(220.dp)
                     .width(220.dp)
-                    .align(Alignment.CenterHorizontally)
             )
+
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
@@ -100,7 +85,6 @@ fun CompletarCadastroScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Indicador de progresso
             IndicadorProgresso(
                 etapaAtual = viewModel.etapaAtual,
                 totalEtapas = viewModel.totalEtapas
@@ -108,32 +92,38 @@ fun CompletarCadastroScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Título e subtítulo da etapa
             AnimatedContent(
                 targetState = viewModel.etapaAtual,
                 transitionSpec = {
-                    slideInHorizontally(initialOffsetX = { fullWidth -> viewModel.direcao * fullWidth }) togetherWith
-                            slideOutHorizontally(targetOffsetX = { fullWidth -> -viewModel.direcao * fullWidth })
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> viewModel.direcao * fullWidth }
+                    ) togetherWith
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -viewModel.direcao * fullWidth }
+                            )
                 },
                 label = "titulo_etapa_completar"
             ) { etapa ->
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+
                     Text(
                         text = viewModel.titulosEtapas[etapa],
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFFFFFF),
+                        color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     Spacer(modifier = Modifier.height(4.dp))
+
                     Text(
                         text = viewModel.subtitulosEtapas[etapa],
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
                         color = Color(0xCCFFFFFF),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -143,20 +133,26 @@ fun CompletarCadastroScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Conteúdo dos campos por etapa
             AnimatedContent(
                 targetState = viewModel.etapaAtual,
                 transitionSpec = {
-                    slideInHorizontally(initialOffsetX = { fullWidth -> viewModel.direcao * fullWidth }) togetherWith
-                            slideOutHorizontally(targetOffsetX = { fullWidth -> -viewModel.direcao * fullWidth })
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> viewModel.direcao * fullWidth }
+                    ) togetherWith
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -viewModel.direcao * fullWidth }
+                            )
                 },
                 label = "campos_etapa_completar"
             ) { etapa ->
+
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     when (etapa) {
+
                         0 -> {
                             EtapaDadosPessoaisSimplificada(
                                 dataNascimento = viewModel.dataNascimento,
@@ -184,12 +180,13 @@ fun CompletarCadastroScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botões de navegação
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
                 if (viewModel.etapaAtual > 0) {
+
                     Button(
                         onClick = { viewModel.voltarEtapa() },
                         colors = ButtonDefaults.buttonColors(
@@ -200,10 +197,11 @@ fun CompletarCadastroScreen(
                             .height(52.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
+
                         Text(
-                            text = "Voltar",
+                            text = stringResource(R.string.voltar),
                             fontSize = 16.sp,
-                            color = Color(0xFFFFFFFF),
+                            color = Color.White,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -219,28 +217,33 @@ fun CompletarCadastroScreen(
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
+
                     if (viewModel.isLoading && viewModel.etapaAtual == viewModel.totalEtapas - 1) {
+
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = Color.White,
                             strokeWidth = 2.dp
                         )
+
                     } else {
+
                         Text(
-                            text = if (viewModel.etapaAtual < viewModel.totalEtapas - 1) "Próximo" else "Concluir",
+                            text = if (viewModel.etapaAtual < viewModel.totalEtapas - 1)
+                                "Próximo"
+                            else
+                                "Concluir",
                             fontSize = 16.sp,
-                            color = Color(0xFFFFFFFF),
+                            color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
             }
 
-            // Indicador de etapa textual
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
@@ -251,6 +254,8 @@ fun CompletarCadastroScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(40.dp))
         }
 
         DialogoRendaAlta(
@@ -267,10 +272,6 @@ fun CompletarCadastroScreen(
     }
 }
 
-/**
- * Etapa simplificada que mostra apenas o campo de Data de Nascimento,
- * sem o campo de Nome (já fornecido pelo Google).
- */
 @Composable
 fun EtapaDadosPessoaisSimplificada(
     dataNascimento: String,
