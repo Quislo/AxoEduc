@@ -48,7 +48,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.com.fiap.axoeduc.components.dialogs.DialogoAlterarSenha
 import br.com.fiap.axoeduc.viewmodel.PerfilViewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
@@ -81,24 +80,6 @@ fun PerfilScreen(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let { viewModel.atualizarFotoPerfil(it) }
-    }
-
-    // Dialog de Alterar Senha
-    if (viewModel.mostrarDialogoSenha) {
-        DialogoAlterarSenha(
-            senhaAtual = viewModel.senhaAtual,
-            novaSenha = viewModel.novaSenha,
-            confirmarNovaSenha = viewModel.confirmarNovaSenha,
-            onSenhaAtualChange = viewModel::onSenhaAtualChange,
-            onNovaSenhaChange = viewModel::onNovaSenhaChange,
-            onConfirmarNovaSenhaChange = viewModel::onConfirmarNovaSenhaChange,
-            senhaAtualErro = viewModel.senhaAtualErro,
-            novaSenhaErro = viewModel.novaSenhaErro,
-            confirmarNovaSenhaErro = viewModel.confirmarNovaSenhaErro,
-            isLoading = viewModel.isLoading,
-            onSalvar = viewModel::salvarSenha,
-            onCancelar = viewModel::fecharDialogoSenha
-        )
     }
 
     Column(
@@ -344,14 +325,6 @@ fun PerfilScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         val blueButtonColor = Color(0xFF3B4CCA)
-
-        ActionBtn(
-            text = "Alterar senha",
-            containerColor = blueButtonColor,
-            onClick = { viewModel.abrirDialogoSenha() }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         ActionBtn(
             text = "Reportar bug",

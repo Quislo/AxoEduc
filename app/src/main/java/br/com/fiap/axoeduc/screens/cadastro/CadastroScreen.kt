@@ -49,7 +49,7 @@ import br.com.fiap.axoeduc.R
 
 @Composable
 fun CadastroScreen(
-    onCadastroSucesso: (usuarioId: Int) -> Unit = {},
+    onCadastroSucesso: (usuarioUid: String) -> Unit = {},
     onVoltarLogin: () -> Unit = {},
     viewModel: CadastroViewModel = viewModel()
 ) {
@@ -58,7 +58,7 @@ fun CadastroScreen(
 
     LaunchedEffect(viewModel.cadastroRealizado) {
         if (viewModel.cadastroRealizado) {
-            onCadastroSucesso(viewModel.usuarioCriadoId)
+            onCadastroSucesso(viewModel.usuarioCriadoUid)
         }
     }
 

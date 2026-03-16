@@ -4,7 +4,7 @@ object ScreenRoutes {
 
     const val LOGIN = "login"
     const val CADASTRO = "cadastro"
-    const val COMPLETAR_CADASTRO = "completar_cadastro/{usuarioId}"
+    const val COMPLETAR_CADASTRO = "completar_cadastro/{usuarioUid}"
     const val CURSOS = "cursos"
     const val FERRAMENTAS = "ferramentas"
     const val COFRINHO = "cofrinho"
@@ -12,5 +12,5 @@ object ScreenRoutes {
     const val CALCULADORA_RESULTADOS = "calculadora_resultado"
     const val CERTIFICADOS = "certificados"
     const val INVESTIMENTOS = "investimentos"
-    const val PERFIL = "perfil/{usuarioId}"
+    const val PERFIL = "perfil/{usuarioUid}"
 }
