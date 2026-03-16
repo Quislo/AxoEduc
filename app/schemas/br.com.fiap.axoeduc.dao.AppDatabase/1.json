@@ -2,16 +2,16 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0690e408fe31fafee1fa95a7a906b5ac",
+    "identityHash": "99502fe99fcca70ca0ef76f7d2ed431e",
     "entities": [
       {
         "tableName": "tb_usuario",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `email` TEXT NOT NULL, `dataNascimento` TEXT NOT NULL, `rendaMensal` REAL NOT NULL, `senha` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` TEXT NOT NULL, `nome` TEXT NOT NULL, `email` TEXT NOT NULL, `dataNascimento` TEXT, `rendaMensal` REAL NOT NULL, `fotoPerfil` TEXT, PRIMARY KEY(`uid`))",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
+            "fieldPath": "uid",
+            "columnName": "uid",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -29,8 +29,7 @@
           {
             "fieldPath": "dataNascimento",
             "columnName": "dataNascimento",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "rendaMensal",
@@ -39,16 +38,15 @@
             "notNull": true
           },
           {
-            "fieldPath": "senha",
-            "columnName": "senha",
-            "affinity": "TEXT",
-            "notNull": true
+            "fieldPath": "fotoPerfil",
+            "columnName": "fotoPerfil",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "id"
+            "uid"
           ]
         },
         "indices": [
@@ -102,7 +100,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0690e408fe31fafee1fa95a7a906b5ac')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '99502fe99fcca70ca0ef76f7d2ed431e')"
     ]
   }
 }

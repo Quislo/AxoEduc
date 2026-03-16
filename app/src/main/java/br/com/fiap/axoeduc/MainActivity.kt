@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,12 +36,13 @@ import br.com.fiap.axoeduc.screens.cadastro.CadastroScreen
 import br.com.fiap.axoeduc.screens.cadastro.CompletarCadastroScreen
 import br.com.fiap.axoeduc.dao.AppDatabase
 import br.com.fiap.axoeduc.repository.UsuarioRepository
+import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.cadastro.CompletarCadastroViewModelFactory
-import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.PerfilViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
@@ -64,18 +64,18 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val database = AppDatabase.getDatabase(context)
                 val usuarioRepository = UsuarioRepository(
-                    dao = database.usuarioDao(),
-                    credencialEmailDao = database.credencialEmailDao(),
-                    credencialGoogleDao = database.credencialGoogleDao()
+                    dao = database.usuarioDao()
                 )
 
-                var usuarioLogadoId by remember { mutableIntStateOf(0) }
+                // UID do usuário logado (Firebase)
+                var usuarioLogadoUid by remember { mutableStateOf("") }
                 var fotoPerfilUri by remember { mutableStateOf<String?>(null) }
-
                 var nomeUsuarioLogado by remember { mutableStateOf("Aluno") }
-                LaunchedEffect(usuarioLogadoId) {
-                    if (usuarioLogadoId > 0) {
-                        usuarioRepository.buscarPorId(usuarioLogadoId).collectLatest { usuario ->
+
+                // Observar dados do usuário logado no Room
+                LaunchedEffect(usuarioLogadoUid) {
+                    if (usuarioLogadoUid.isNotEmpty()) {
+                        usuarioRepository.buscarPorUid(usuarioLogadoUid).collectLatest { usuario ->
                             fotoPerfilUri = usuario?.fotoPerfil
                             nomeUsuarioLogado = usuario?.nome ?: "Aluno"
                         }
@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 fun navegarParaPerfil() {
-                    navController.navigate("perfil/$usuarioLogadoId")
+                    navController.navigate("perfil/$usuarioLogadoUid")
                 }
 
                 Scaffold(
@@ -117,51 +117,50 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         composable(ScreenRoutes.LOGIN) {
-                            val loginViewModel: br.com.fiap.axoeduc.viewmodel.login.LoginViewModel = viewModel(
-                                factory = LoginViewModelFactory(usuarioRepository)
-                            )
-
                             LoginScreen(
                                 onLoginSuccess = {
-                                    // Captura o ID do usuário logado antes de navegar
-                                    loginViewModel.usuarioLogadoId?.let { id ->
-                                        usuarioLogadoId = id
-                                    }
+                                    // Pegar UID do Firebase Auth e atualizar estado
+                                    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                    usuarioLogadoUid = uid
                                     navController.navigate(ScreenRoutes.CURSOS) {
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
                                 onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
-                                onCadastroIncompleto = { id ->
-                                    usuarioLogadoId = id
-                                    navController.navigate("completar_cadastro/$id") {
+                                onCadastroIncompleto = { uid ->
+                                    usuarioLogadoUid = uid
+                                    navController.navigate("completar_cadastro/$uid") {
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
-                                viewModel = loginViewModel
+                                viewModel = viewModel(
+                                    factory = LoginViewModelFactory(usuarioRepository)
+                                )
                             )
                         }
 
                         composable(ScreenRoutes.CADASTRO) {
                             CadastroScreen(
-                                onCadastroSucesso = { usuarioId ->
-                                    usuarioLogadoId = usuarioId
+                                onCadastroSucesso = { uid ->
+                                    usuarioLogadoUid = uid
                                     navController.navigate(ScreenRoutes.CURSOS) {
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 },
                                 onVoltarLogin = { navController.popBackStack() },
-                                viewModel = viewModel(factory = CadastroViewModelFactory(usuarioRepository))
+                                viewModel = viewModel(
+                                    factory = CadastroViewModelFactory(usuarioRepository)
+                                )
                             )
                         }
 
                         composable(
                             route = ScreenRoutes.COMPLETAR_CADASTRO,
                             arguments = listOf(
-                                navArgument("usuarioId") { type = NavType.IntType }
+                                navArgument("usuarioUid") { type = NavType.StringType }
                             )
                         ) { backStackEntry ->
-                            val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+                            val usuarioUid = backStackEntry.arguments?.getString("usuarioUid") ?: ""
 
                             CompletarCadastroScreen(
                                 onCadastroCompleto = {
@@ -170,7 +169,10 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 viewModel = viewModel(
-                                    factory = CompletarCadastroViewModelFactory(usuarioRepository, usuarioId)
+                                    factory = CompletarCadastroViewModelFactory(
+                                        usuarioUid,
+                                        usuarioRepository
+                                    )
                                 )
                             )
                         }
@@ -178,21 +180,23 @@ class MainActivity : ComponentActivity() {
                         composable(
                             route = ScreenRoutes.PERFIL,
                             arguments = listOf(
-                                navArgument("usuarioId") { type = NavType.IntType }
+                                navArgument("usuarioUid") { type = NavType.StringType }
                             )
                         ) { backStackEntry ->
-                            val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+                            val usuarioUid = backStackEntry.arguments?.getString("usuarioUid") ?: ""
 
                             PerfilScreen(
                                 onVoltarClick = { navController.popBackStack() },
                                 onSairClick = {
-                                    usuarioLogadoId = 0
+                                    // Logout do Firebase
+                                    FirebaseAuth.getInstance().signOut()
+                                    usuarioLogadoUid = ""
                                     navController.navigate(ScreenRoutes.LOGIN) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
                                 viewModel = viewModel(
-                                    factory = PerfilViewModelFactory(usuarioRepository, usuarioId)
+                                    factory = PerfilViewModelFactory(usuarioRepository, usuarioUid)
                                 )
                             )
                         }

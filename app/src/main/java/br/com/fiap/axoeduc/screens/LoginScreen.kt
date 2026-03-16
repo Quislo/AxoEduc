@@ -1,6 +1,6 @@
 package br.com.fiap.axoeduc.screens
 
-import android.app.Activity
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -55,14 +56,14 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.fiap.axoeduc.BuildConfig
 import br.com.fiap.axoeduc.R
 import br.com.fiap.axoeduc.components.inputs.EmailInput
 import br.com.fiap.axoeduc.components.inputs.SenhaInput
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModel
-import br.com.fiap.axoeduc.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.delay
@@ -73,37 +74,36 @@ import kotlin.math.roundToInt
 fun LoginScreen(
     onLoginSuccess: () -> Unit = {},
     onCriarConta: () -> Unit = {},
-    onCadastroIncompleto: (usuarioId: Int) -> Unit = {},
+    onCadastroIncompleto: (usuarioUid: String) -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
-    // Controla visibilidade do banner de erro inline
-    var showErrorBanner by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
-    // Animatable para o efeito de "shake" horizontal nos inputs
+    var showErrorBanner by remember { mutableStateOf(false) }
     val shakeOffset = remember { Animatable(0f) }
 
-    // Google Sign-In
-    val contexto = LocalContext.current
-    val credentialManager = remember { CredentialManager.create(contexto) }
-    val escopo = rememberCoroutineScope()
+    // Verificar sessão existente ao abrir a tela
+    LaunchedEffect(Unit) {
+        viewModel.verificarSessaoExistente()
+    }
 
-    // Dispara navegação ao login bem-sucedido
+    // Navegar ao login bem-sucedido
     LaunchedEffect(viewModel.loginRealizado) {
         if (viewModel.loginRealizado) {
             if (viewModel.cadastroIncompleto) {
-                onCadastroIncompleto(viewModel.usuarioLogadoId ?: 0)
+                onCadastroIncompleto(viewModel.usuarioLogadoUid ?: "")
             } else {
                 onLoginSuccess()
             }
         }
     }
 
-    // Reage a erros: exibe banner + dispara shake + auto-dismiss após 4s
+    // Erro: exibe banner + shake + auto-dismiss
     LaunchedEffect(viewModel.errorMessage) {
         viewModel.errorMessage?.let {
             showErrorBanner = true
 
-            // Shake: sequência de offsets para simular vibração lateral
             launch {
                 val shakeValues = listOf(10f, -10f, 8f, -8f, 5f, -5f, 2f, 0f)
                 for (value in shakeValues) {
@@ -117,7 +117,6 @@ fun LoginScreen(
                 }
             }
 
-            // Auto-dismiss do banner após 4 segundos
             delay(4_000)
             showErrorBanner = false
         }
@@ -206,7 +205,7 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .padding(top = 4.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0x26FF3B30))   // vermelho translúcido
+                        .background(Color(0x26FF3B30))
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -243,7 +242,7 @@ fun LoginScreen(
                 shape = RoundedCornerShape(12.dp),
             ) {
                 if (viewModel.isLoading) {
-                    androidx.compose.material3.CircularProgressIndicator(
+                    CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = Color.White,
                         strokeWidth = 2.dp
@@ -285,10 +284,13 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Botão Google Sign-In via Credential Manager
             OutlinedButton(
                 onClick = {
-                    escopo.launch {
+                    coroutineScope.launch {
                         try {
+                            val credentialManager = CredentialManager.create(context)
+
                             val googleIdOption = GetGoogleIdOption.Builder()
                                 .setFilterByAuthorizedAccounts(false)
                                 .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
@@ -299,28 +301,20 @@ fun LoginScreen(
                                 .build()
 
                             val result = credentialManager.getCredential(
-                                contexto as Activity,
-                                request
+                                request = request,
+                                context = context
                             )
-                            val credential = result.credential
 
-                            if (credential is CustomCredential &&
-                                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-                            ) {
-                                val googleCredential =
-                                    GoogleIdTokenCredential.createFrom(credential.data)
-                                viewModel.loginComGoogle(
-                                    nome = googleCredential.displayName ?: "",
-                                    email = googleCredential.id,
-                                    googleId = googleCredential.idToken,
-                                    fotoPerfil = googleCredential.profilePictureUri?.toString()
-                                )
-                            }
-                        } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
-                            // Usuário cancelou — sem ação
+                            val googleIdTokenCredential = GoogleIdTokenCredential
+                                .createFrom(result.credential.data)
+
+                            viewModel.loginComGoogle(googleIdTokenCredential.idToken)
+
+                        } catch (e: GetCredentialCancellationException) {
+                            // Usuário cancelou — não faz nada
                         } catch (e: Exception) {
-                            android.util.Log.e("LoginScreen", "Google Sign-In falhou", e)
-                            viewModel.errorMessage = "Erro no Google Sign-In: ${e.message}"
+                            Log.e("LoginScreen", "Google Sign-In error", e)
+                            viewModel.errorMessage = "Erro no login com Google: ${e.message}"
                         }
                     }
                 },
@@ -335,7 +329,7 @@ fun LoginScreen(
                 border = BorderStroke(1.dp, Color(0xAAFFFFFF))
             ) {
                 if (viewModel.googleLoginEmProgresso) {
-                    androidx.compose.material3.CircularProgressIndicator(
+                    CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = Color(0xFF606060),
                         strokeWidth = 2.dp
@@ -387,6 +381,5 @@ fun LoginScreen(
                 )
             }
         }
-
     }
 }

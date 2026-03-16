@@ -6,12 +6,12 @@ import br.com.fiap.axoeduc.repository.UsuarioRepository
 
 class PerfilViewModelFactory(
     private val repository: UsuarioRepository,
-    private val usuarioId: Int
+    private val usuarioUid: String
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(PerfilViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return PerfilViewModel(repository, usuarioId) as T
+            return PerfilViewModel(repository, usuarioUid) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
