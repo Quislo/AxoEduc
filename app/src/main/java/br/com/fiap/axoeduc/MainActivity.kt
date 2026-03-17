@@ -23,7 +23,6 @@ import br.com.fiap.axoeduc.navigation.AppNavigation
 import br.com.fiap.axoeduc.dao.AppDatabase
 import br.com.fiap.axoeduc.repository.UsuarioRepository
 import androidx.compose.ui.platform.LocalContext
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {

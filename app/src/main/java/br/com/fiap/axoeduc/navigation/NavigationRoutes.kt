@@ -14,6 +14,7 @@ import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
 import br.com.fiap.axoeduc.screens.CertificadosScreen
 import br.com.fiap.axoeduc.screens.CofrinhoScreen
 import br.com.fiap.axoeduc.screens.CursosScreen
+import br.com.fiap.axoeduc.screens.EsqueciSenhaScreen
 import br.com.fiap.axoeduc.screens.FerramentasScreen
 import br.com.fiap.axoeduc.screens.InvestimentosScreen
 import br.com.fiap.axoeduc.screens.LoginScreen
@@ -56,6 +57,7 @@ fun AppNavigation(
                     }
                 },
                 onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
+                onEsqueciSenha = { navController.navigate(ScreenRoutes.ESQUECI_SENHA) },
                 onCadastroIncompleto = { id ->
                     onUsuarioLogadoChange(id.toString())
                     navController.navigate("completar_cadastro/$id") {
@@ -76,6 +78,12 @@ fun AppNavigation(
                 },
                 onVoltarLogin = { navController.popBackStack() },
                 viewModel = viewModel(factory = CadastroViewModelFactory(usuarioRepository))
+            )
+        }
+
+        composable(ScreenRoutes.ESQUECI_SENHA) {
+            EsqueciSenhaScreen(
+                onVoltarLogin = { navController.popBackStack() }
             )
         }
 
