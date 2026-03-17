@@ -1,5 +1,6 @@
 package br.com.fiap.axoeduc.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,6 +17,7 @@ import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.cadastro.CompletarCadastroViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(
@@ -23,7 +25,7 @@ fun AppNavigation(
     modifier: Modifier = Modifier,
     usuarioRepository: UsuarioRepository,
     nomeUsuarioLogado: String,
-    onUsuarioLogadoChange: (Int) -> Unit,
+    onUsuarioLogadoChange: (String) -> Unit,
     navegarParaPerfil: () -> Unit
 ) {
     NavHost(
@@ -38,16 +40,16 @@ fun AppNavigation(
 
             LoginScreen(
                 onLoginSuccess = {
-                    loginViewModel.usuarioLogadoId?.let { id ->
-                        onUsuarioLogadoChange(id)
-                    }
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    onUsuarioLogadoChange(uid)
+
                     navController.navigate(ScreenRoutes.CURSOS) {
                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                     }
                 },
                 onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
                 onCadastroIncompleto = { id ->
-                    onUsuarioLogadoChange(id)
+                    onUsuarioLogadoChange(id.toString())
                     navController.navigate("completar_cadastro/$id") {
                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                     }
@@ -58,8 +60,8 @@ fun AppNavigation(
 
         composable(ScreenRoutes.CADASTRO) {
             CadastroScreen(
-                onCadastroSucesso = { usuarioId ->
-                    onUsuarioLogadoChange(usuarioId)
+                onCadastroSucesso = { id ->
+                    onUsuarioLogadoChange(id.toString())
                     navController.navigate(ScreenRoutes.CURSOS) {
                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                     }
@@ -72,10 +74,10 @@ fun AppNavigation(
         composable(
             route = ScreenRoutes.COMPLETAR_CADASTRO,
             arguments = listOf(
-                navArgument("usuarioId") { type = NavType.IntType }
+                navArgument("usuarioUid") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+            val usuarioUid = backStackEntry.arguments?.getString("usuarioUid") ?: ""
 
             CompletarCadastroScreen(
                 onCadastroCompleto = {
@@ -84,7 +86,7 @@ fun AppNavigation(
                     }
                 },
                 viewModel = viewModel(
-                    factory = CompletarCadastroViewModelFactory(usuarioRepository, usuarioId)
+                    factory = CompletarCadastroViewModelFactory(usuarioUid, usuarioRepository)
                 )
             )
         }
@@ -92,28 +94,27 @@ fun AppNavigation(
         composable(
             route = ScreenRoutes.PERFIL,
             arguments = listOf(
-                navArgument("usuarioId") { type = NavType.IntType }
+                navArgument("usuarioUid") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: 0
+            val usuarioUid = backStackEntry.arguments?.getString("usuarioUid") ?: ""
 
             PerfilScreen(
                 onVoltarClick = { navController.popBackStack() },
                 onSairClick = {
-                    onUsuarioLogadoChange(0) // Zera o ID ao sair
+                    FirebaseAuth.getInstance().signOut()
+                    onUsuarioLogadoChange("")
                     navController.navigate(ScreenRoutes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
                 viewModel = viewModel(
-                    factory = PerfilViewModelFactory(usuarioRepository, usuarioId)
+                    factory = PerfilViewModelFactory(usuarioRepository, usuarioUid)
                 )
             )
         }
 
-        composable(ScreenRoutes.CURSOS) {
-            CursosScreen()
-        }
+        composable(ScreenRoutes.CURSOS) { CursosScreen() }
 
         composable(ScreenRoutes.FERRAMENTAS) {
             FerramentasScreen(

@@ -1,7 +1,6 @@
 package br.com.fiap.axoeduc.navigation
 
 object ScreenRoutes {
-
     const val LOGIN = "login"
     const val CADASTRO = "cadastro"
     const val COMPLETAR_CADASTRO = "completar_cadastro/{usuarioUid}"
