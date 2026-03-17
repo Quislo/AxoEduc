@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -51,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,6 +74,7 @@ import kotlin.math.roundToInt
 fun LoginScreen(
     onLoginSuccess: () -> Unit = {},
     onCriarConta: () -> Unit = {},
+    onEsqueciSenha: () -> Unit = {},
     onCadastroIncompleto: (usuarioUid: String) -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
@@ -83,12 +84,10 @@ fun LoginScreen(
     var showErrorBanner by remember { mutableStateOf(false) }
     val shakeOffset = remember { Animatable(0f) }
 
-    // Verificar sessão existente ao abrir a tela
     LaunchedEffect(Unit) {
         viewModel.verificarSessaoExistente()
     }
 
-    // Navegar ao login bem-sucedido
     LaunchedEffect(viewModel.loginRealizado) {
         if (viewModel.loginRealizado) {
             if (viewModel.cadastroIncompleto) {
@@ -99,7 +98,6 @@ fun LoginScreen(
         }
     }
 
-    // Erro: exibe banner + shake + auto-dismiss
     LaunchedEffect(viewModel.errorMessage) {
         viewModel.errorMessage?.let {
             showErrorBanner = true
@@ -176,18 +174,23 @@ fun LoginScreen(
                     errorMessage = viewModel.senhaErro,
                     enabled = !viewModel.isLoading,
                 )
+
+                TextButton(
+                    onClick = onEsqueciSenha,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+                        .padding(top = 2.dp)
+                        .align(Alignment.Start)
+                ) {
+                    Text(
+                        text = "Esqueci minha senha",
+                        fontSize = 13.sp,
+                        color = Color(0xFFB0C4FF),
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = "Esqueci minha senha",
-                fontSize = 13.sp,
-                color = Color(0xFFB0C4FF),
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Start,
-                modifier = Modifier.fillMaxWidth()
-            )
 
             AnimatedVisibility(
                 visible = showErrorBanner,

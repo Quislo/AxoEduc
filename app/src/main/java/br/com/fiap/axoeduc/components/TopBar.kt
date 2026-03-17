@@ -21,12 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
-@Preview(showBackground = true)
-@Composable
-fun CustomTopBarPreview() {
-    CustomTopBar(onProfileClick = {})
-}
-
 @Composable
 fun CustomTopBar(
     onProfileClick: () -> Unit,
@@ -54,7 +48,7 @@ fun CustomTopBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "EFUB",
+                text = "AxoEduc",
                 color = Color.White,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold

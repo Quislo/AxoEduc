@@ -13,4 +13,5 @@ object ScreenRoutes {
     const val CERTIFICADOS = "certificados"
     const val INVESTIMENTOS = "investimentos"
     const val PERFIL = "perfil/{usuarioUid}"
+    const val ESQUECI_SENHA = "esqueci_senha"
 }

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -55,12 +56,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun PerfilScreen(
     onVoltarClick: () -> Unit = {},
-    onReportarBugClick: () -> Unit = {},
-    onFaleConoscoClick: () -> Unit = {},
     onSairClick: () -> Unit = {},
     viewModel: PerfilViewModel,
 ) {
-    // Auto-dismiss das mensagens de feedback após 3 segundos
     LaunchedEffect(viewModel.mensagemSucesso) {
         if (viewModel.mensagemSucesso != null) {
             delay(3_000)
@@ -74,8 +72,7 @@ fun PerfilScreen(
             viewModel.limparFeedback()
         }
     }
-
-    // Photo Picker launcher
+    
     val fotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -90,7 +87,6 @@ fun PerfilScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Header ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -168,6 +164,24 @@ fun PerfilScreen(
                     modifier = Modifier.size(24.dp)
                 )
             }
+
+            if (viewModel.fotoPerfilUri != null) {
+                IconButton(
+                    onClick = { viewModel.removerFotoPerfil() },
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 12.dp, bottom = 12.dp)
+                        .size(32.dp)
+                        .background(Color(0xFFD32F2F), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Remover foto",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -177,7 +191,7 @@ fun PerfilScreen(
             onValueChange = viewModel::onNomeChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Nome") },
-            isError = viewModel.nomeErro != null,
+          isError = viewModel.nomeErro != null,
             supportingText = if (viewModel.nomeErro != null) {
                 { Text(viewModel.nomeErro!!, color = Color(0xFFD32F2F)) }
             } else null,
@@ -321,24 +335,6 @@ fun PerfilScreen(
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val blueButtonColor = Color(0xFF3B4CCA)
-
-        ActionBtn(
-            text = "Reportar bug",
-            containerColor = blueButtonColor,
-            onClick = onReportarBugClick
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActionBtn(
-            text = "Fale conosco",
-            containerColor = blueButtonColor,
-            onClick = onFaleConoscoClick
-        )
 
         Spacer(modifier = Modifier.weight(1f))
 

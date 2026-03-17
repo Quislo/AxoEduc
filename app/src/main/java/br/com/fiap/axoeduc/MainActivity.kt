@@ -32,6 +32,7 @@ import br.com.fiap.axoeduc.screens.CofrinhoScreen
 import br.com.fiap.axoeduc.screens.InvestimentosScreen
 import br.com.fiap.axoeduc.screens.LoginScreen
 import br.com.fiap.axoeduc.screens.PerfilScreen
+import br.com.fiap.axoeduc.screens.EsqueciSenhaScreen
 import br.com.fiap.axoeduc.screens.cadastro.CadastroScreen
 import br.com.fiap.axoeduc.screens.cadastro.CompletarCadastroScreen
 import br.com.fiap.axoeduc.dao.AppDatabase
@@ -59,7 +60,8 @@ class MainActivity : ComponentActivity() {
                 val showBars = currentRoute != ScreenRoutes.LOGIN &&
                         currentRoute != ScreenRoutes.CADASTRO &&
                         currentRoute != ScreenRoutes.COMPLETAR_CADASTRO &&
-                        currentRoute != ScreenRoutes.PERFIL
+                        currentRoute != ScreenRoutes.PERFIL &&
+                        currentRoute != ScreenRoutes.ESQUECI_SENHA
 
                 val context = LocalContext.current
                 val database = AppDatabase.getDatabase(context)
@@ -127,6 +129,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onCriarConta = { navController.navigate(ScreenRoutes.CADASTRO) },
+                                onEsqueciSenha = { navController.navigate(ScreenRoutes.ESQUECI_SENHA) },
                                 onCadastroIncompleto = { uid ->
                                     usuarioLogadoUid = uid
                                     navController.navigate("completar_cadastro/$uid") {
@@ -136,6 +139,12 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel(
                                     factory = LoginViewModelFactory(usuarioRepository)
                                 )
+                            )
+                        }
+
+                        composable(ScreenRoutes.ESQUECI_SENHA) {
+                            EsqueciSenhaScreen(
+                                onVoltarLogin = { navController.popBackStack() }
                             )
                         }
 
