@@ -1,5 +1,8 @@
 package br.com.fiap.axoeduc.screens.cadastro
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -75,9 +78,11 @@ fun CadastroScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(horizontal = 32.dp),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(horizontal = 32.dp)
+                .padding(bottom = 70.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
