@@ -1,6 +1,5 @@
 package br.com.fiap.axoeduc.navigation
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -10,13 +9,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import br.com.fiap.axoeduc.repository.UsuarioRepository
-import br.com.fiap.axoeduc.screens.*
-import br.com.fiap.axoeduc.screens.cadastro.*
+import br.com.fiap.axoeduc.screens.CalculadoraJurosResultadoScreen
+import br.com.fiap.axoeduc.screens.CalculadoraJurosScreen
+import br.com.fiap.axoeduc.screens.CertificadosScreen
+import br.com.fiap.axoeduc.screens.CofrinhoScreen
+import br.com.fiap.axoeduc.screens.CursosScreen
+import br.com.fiap.axoeduc.screens.FerramentasScreen
+import br.com.fiap.axoeduc.screens.InvestimentosScreen
+import br.com.fiap.axoeduc.screens.LoginScreen
+import br.com.fiap.axoeduc.screens.PerfilScreen
+import br.com.fiap.axoeduc.screens.cadastro.CadastroScreen
+import br.com.fiap.axoeduc.screens.cadastro.CompletarCadastroScreen
 import br.com.fiap.axoeduc.viewmodel.PerfilViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.cadastro.CadastroViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.cadastro.CompletarCadastroViewModelFactory
-import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
 import br.com.fiap.axoeduc.viewmodel.login.LoginViewModel
+import br.com.fiap.axoeduc.viewmodel.login.LoginViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable

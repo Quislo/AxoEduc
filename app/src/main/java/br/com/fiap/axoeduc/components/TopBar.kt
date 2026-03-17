@@ -21,12 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
-@Preview(showBackground = true)
-@Composable
-fun CustomTopBarPreview() {
-    CustomTopBar(onProfileClick = {})
-}
-
 @Composable
 fun CustomTopBar(
     onProfileClick: () -> Unit,

@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(paddingValues),
                         usuarioRepository = usuarioRepository,
                         nomeUsuarioLogado = nomeUsuarioLogado,
-                        onUsuarioLogadoChange = { uid -> usuarioLogadoUid = uid }, 
+                        onUsuarioLogadoChange = { uid -> usuarioLogadoUid = uid },
                         navegarParaPerfil = { navegarParaPerfil() }
                     )
 

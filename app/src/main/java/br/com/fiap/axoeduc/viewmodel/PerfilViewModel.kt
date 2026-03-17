@@ -157,6 +157,18 @@ class PerfilViewModel(
         }
     }
 
+    fun removerFotoPerfil() {
+        fotoPerfilUri = null
+        viewModelScope.launch {
+            try {
+                repository.atualizarFotoPerfil(usuarioUid, null)
+                mensagemSucesso = "Foto de perfil removida"
+            } catch (e: Exception) {
+                mensagemErro = "Erro ao remover foto: ${e.message}"
+            }
+        }
+    }
+
     fun limparFeedback() {
         mensagemSucesso = null
         mensagemErro = null
