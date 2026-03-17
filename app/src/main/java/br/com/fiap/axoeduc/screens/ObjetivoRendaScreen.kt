@@ -74,7 +74,7 @@ fun CalculadoraJurosScreen(
         Spacer(modifier = Modifier.height(30.dp))
 
         Text(
-            text = "Calculadora de juros",
+            text = "Renda e Objetivo",
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold
         )

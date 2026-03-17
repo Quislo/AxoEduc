@@ -8,12 +8,20 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.fiap.axoeduc.components.inputs.validarData
+import br.com.fiap.axoeduc.model.Usuario
 import br.com.fiap.axoeduc.repository.UsuarioRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel() {
+class CadastroViewModel(
+    private val repository: UsuarioRepository
+) : ViewModel() {
+
+    private val auth = FirebaseAuth.getInstance()
 
     // Campos — Etapa 1
     var nome by mutableStateOf("")
@@ -40,7 +48,7 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
     var mostrarPoliticaPrivacidade by mutableStateOf(false)
     var mostrarTermosUso by mutableStateOf(false)
 
-    // Estados de erro por campo da etapa 3 — controlados pelo ViewModel
+    // Estados de erro por campo da etapa 3
     var emailErro by mutableStateOf<String?>(null)
         private set
     var senhaErro by mutableStateOf<String?>(null)
@@ -48,14 +56,14 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
     var confirmarSenhaErro by mutableStateOf<String?>(null)
         private set
 
-    // Estados Assíncronos (Banco de Dados)
+    // Estados Assíncronos
     var isLoading by mutableStateOf(false)
         private set
     var errorMessage by mutableStateOf<String?>(null)
         private set
     var cadastroRealizado by mutableStateOf(false)
         private set
-    var usuarioCriadoId by mutableIntStateOf(0)
+    var usuarioCriadoUid by mutableStateOf("")
         private set
 
     // Constantes
@@ -74,7 +82,6 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
         "Crie sua conta para começar"
     )
 
-    /** Callbacks de change — limpam erro do campo ao digitar. */
     fun onEmailChange(novoValor: String) {
         email = novoValor
         emailErro = null
@@ -93,7 +100,6 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
         enviado = false
     }
 
-    /** Chamado pelo `onFocusLost` do EmailInput — valida formato + duplicidade. */
     fun onEmailFocusLost() {
         if (email.isBlank()) return
 
@@ -102,11 +108,17 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
             return
         }
 
-        // Formato OK — verifica duplicidade no banco (Room local, latência desprezível)
+        // Verificar duplicidade no Firebase
         viewModelScope.launch {
-            val usuarioExistente = repository.buscarPorEmail(email.trim())
-            if (usuarioExistente != null) {
-                emailErro = "E-mail já vinculado a uma conta existente"
+            try {
+                auth.fetchSignInMethodsForEmail(email)
+                    .addOnSuccessListener { result ->
+                        if (result.signInMethods?.isNotEmpty() == true) {
+                            emailErro = "E-mail já cadastrado"
+                        }
+                    }
+            } catch (_: Exception) {
+                // Silenciar erros de rede na validação inline
             }
         }
     }
@@ -135,10 +147,6 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
         }
     }
 
-    /**
-     * Valida os campos da etapa 3 e popula os estados de erro por campo.
-     * Retorna `true` se todos os campos estão válidos.
-     */
     private fun validarEtapa3(): Boolean {
         emailErro = when {
             email.isBlank() -> "Campo obrigatório"
@@ -148,6 +156,7 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
 
         senhaErro = when {
             senha.isBlank() -> "Campo obrigatório"
+            senha.length < 6 -> "Mínimo de 6 caracteres"
             else -> null
         }
 
@@ -160,16 +169,11 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
         return emailErro == null && senhaErro == null && confirmarSenhaErro == null
     }
 
-    /**
-     * Tenta avançar para a próxima etapa.
-     * Na última etapa, realiza a requisição ao repositório via Coroutines.
-     */
     fun avancarEtapa() {
         enviado = true
         errorMessage = null
 
         if (!isEtapaValida()) {
-            // Se está na etapa 3, popula erros por campo
             if (etapaAtual == 2) validarEtapa3()
             return
         }
@@ -186,52 +190,63 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
             return
         }
 
-        // Última etapa válida — Iniciar persistência no banco
+        // Última etapa válida — criar conta no Firebase + salvar no Room
         salvarUsuario()
     }
 
+    /**
+     * Cria a conta no Firebase Auth e salva dados de perfil no Room.
+     */
     private fun salvarUsuario() {
-        viewModelScope.launch {
-            try {
-                isLoading = true
-                errorMessage = null
+        if (!validarEtapa3()) return
 
-                // 1. Verifica duplicidade de E-mail
-                val usuarioExistente = repository.buscarPorEmail(email.trim())
-                if (usuarioExistente != null) {
-                    emailErro = "E-mail já vinculado a uma conta existente"
-                    return@launch
+        isLoading = true
+        errorMessage = null
+
+        auth.createUserWithEmailAndPassword(email, senha)
+            .addOnCompleteListener { tarefa ->
+                if (tarefa.isSuccessful) {
+                    val user = auth.currentUser!!
+
+                    // Atualizar displayName no Firebase
+                    val profileUpdates = userProfileChangeRequest {
+                        displayName = nome.trim()
+                    }
+                    user.updateProfile(profileUpdates).addOnCompleteListener {
+                        // Salvar dados no Room
+                        viewModelScope.launch {
+                            try {
+                                val formatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+                                val dataNascParsed = LocalDate.parse(dataNascimento, formatter)
+                                val rendaDouble = (rendaMensal.toLongOrNull() ?: 0L) / 100.0
+
+                                repository.salvar(
+                                    Usuario(
+                                        uid = user.uid,
+                                        nome = nome.trim(),
+                                        email = email.trim(),
+                                        dataNascimento = dataNascParsed,
+                                        rendaMensal = rendaDouble
+                                    )
+                                )
+
+                                usuarioCriadoUid = user.uid
+                                cadastroRealizado = true
+                            } catch (e: Exception) {
+                                errorMessage = "Erro ao salvar dados: ${e.message}"
+                            } finally {
+                                isLoading = false
+                            }
+                        }
+                    }
+                } else {
+                    isLoading = false
+                    errorMessage = when (tarefa.exception) {
+                        is FirebaseAuthUserCollisionException -> "E-mail já cadastrado"
+                        else -> "Erro ao criar conta: ${tarefa.exception?.message}"
+                    }
                 }
-
-                // 2. Formata Dados
-                // dataNascimento vem como "DDMMAAAA", formatamos para LocalDate
-                val dataFormatada = LocalDate.parse(
-                    dataNascimento,
-                    DateTimeFormatter.ofPattern("ddMMyyyy")
-                )
-
-                // rendaMensal vem em centavos, convertemos para Double (Reais)
-                val rendaDouble = (rendaMensal.toLongOrNull() ?: 0L) / 100.0
-
-                // 3. Salva no banco de dados local
-                val novoId = repository.cadastrar(
-                    nome = nome.trim(),
-                    email = email.trim(),
-                    dataNascimento = dataFormatada,
-                    rendaMensal = rendaDouble,
-                    senha = senha
-                )
-
-                // 4. Emite Sucesso para a View navegar
-                usuarioCriadoId = novoId.toInt()
-                cadastroRealizado = true
-
-            } catch (e: Exception) {
-                errorMessage = "Erro ao criar conta: ${e.message}"
-            } finally {
-                isLoading = false
             }
-        }
     }
 
     fun voltarEtapa() {
@@ -239,7 +254,6 @@ class CadastroViewModel(private val repository: UsuarioRepository) : ViewModel()
         enviado = false
         etapaAtual--
         errorMessage = null
-        // Limpa erros da etapa 3 ao voltar
         emailErro = null
         senhaErro = null
         confirmarSenhaErro = null

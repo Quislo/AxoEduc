@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -24,6 +23,7 @@ import br.com.fiap.axoeduc.navigation.AppNavigation
 import br.com.fiap.axoeduc.dao.AppDatabase
 import br.com.fiap.axoeduc.repository.UsuarioRepository
 import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
@@ -45,18 +45,16 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val database = AppDatabase.getDatabase(context)
                 val usuarioRepository = UsuarioRepository(
-                    dao = database.usuarioDao(),
-                    credencialEmailDao = database.credencialEmailDao(),
-                    credencialGoogleDao = database.credencialGoogleDao()
+                    dao = database.usuarioDao()
                 )
 
-                var usuarioLogadoId by remember { mutableIntStateOf(0) }
+                var usuarioLogadoUid by remember { mutableStateOf("") }
                 var fotoPerfilUri by remember { mutableStateOf<String?>(null) }
                 var nomeUsuarioLogado by remember { mutableStateOf("Aluno") }
 
-                LaunchedEffect(usuarioLogadoId) {
-                    if (usuarioLogadoId > 0) {
-                        usuarioRepository.buscarPorId(usuarioLogadoId).collectLatest { usuario ->
+                LaunchedEffect(usuarioLogadoUid) {
+                    if (usuarioLogadoUid.isNotEmpty()) {
+                        usuarioRepository.buscarPorUid(usuarioLogadoUid).collectLatest { usuario ->
                             fotoPerfilUri = usuario?.fotoPerfil
                             nomeUsuarioLogado = usuario?.nome ?: "Aluno"
                         }
@@ -67,7 +65,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 fun navegarParaPerfil() {
-                    navController.navigate("perfil/$usuarioLogadoId")
+                    navController.navigate("perfil/$usuarioLogadoUid")
                 }
 
                 Scaffold(
@@ -96,7 +94,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(paddingValues),
                         usuarioRepository = usuarioRepository,
                         nomeUsuarioLogado = nomeUsuarioLogado,
-                        onUsuarioLogadoChange = { id -> usuarioLogadoId = id },
+                        onUsuarioLogadoChange = { uid -> usuarioLogadoUid = uid }, 
                         navegarParaPerfil = { navegarParaPerfil() }
                     )
 

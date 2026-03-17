@@ -13,8 +13,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class CompletarCadastroViewModel(
-    private val repository: UsuarioRepository,
-    private val usuarioId: Int
+    private val usuarioUid: String,
+    private val repository: UsuarioRepository
 ) : ViewModel() {
 
     // Campos
@@ -81,7 +81,6 @@ class CompletarCadastroViewModel(
             return
         }
 
-        // Última etapa válida — salvar
         salvarDados()
     }
 
@@ -97,21 +96,22 @@ class CompletarCadastroViewModel(
         salvarDados()
     }
 
+    /**
+     * Salva dados complementares no Room (dataNascimento e renda).
+     */
     private fun salvarDados() {
+        isLoading = true
+        errorMessage = null
+
         viewModelScope.launch {
             try {
-                isLoading = true
-                errorMessage = null
-
-                val dataFormatada = LocalDate.parse(
-                    dataNascimento,
-                    DateTimeFormatter.ofPattern("ddMMyyyy")
-                )
+                val formatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+                val dataNascParsed = LocalDate.parse(dataNascimento, formatter)
                 val rendaDouble = (rendaMensal.toLongOrNull() ?: 0L) / 100.0
 
-                repository.completarCadastro(usuarioId, rendaDouble, dataFormatada)
-                cadastroCompleto = true
+                repository.completarCadastro(usuarioUid, rendaDouble, dataNascParsed)
 
+                cadastroCompleto = true
             } catch (e: Exception) {
                 errorMessage = "Erro ao salvar dados: ${e.message}"
             } finally {

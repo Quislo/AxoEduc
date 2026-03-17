@@ -11,9 +11,9 @@ import java.time.LocalDate
     indices = [Index(value = ["email"], unique = true)]
 )
 data class Usuario(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Int,
+    @PrimaryKey
+    @ColumnInfo(name = "uid")
+    val uid: String,
 
     @ColumnInfo(name = "nome")
     val nome: String,
